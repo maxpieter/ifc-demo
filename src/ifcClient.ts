@@ -15,10 +15,12 @@ export interface LIO<A = unknown> { __ifc: true; label: IfcLabel; value: A }
 
 export const mkIfcLabel = (name: string): IfcLabel => {
   if ((IFC as any).label) {
-    try { return (IFC as any).label(name); } catch { /* fall through */ }
+    try {
+      return (IFC as any).label(name);
+    } catch { /* fall through */ }
   }
-  // fallback: wrap runtime name
-  return { ifc: true, name };
+  const id = name.toLowerCase().replace(/\s+/g, '-');
+  return { ifc: true, id, name };
 };
 
 export const pure = <A>(label: IfcLabel, value: A): LIO<A> => {
@@ -107,5 +109,16 @@ export const join = (
 };
 
 // Bridge between runtime labels and ifc labels (for UI → IFC interop)
-export const toIfcLabel = (rt: RuntimeLabel): IfcLabel => mkIfcLabel(rt.name);
-export const fromIfcLabel = (lbl: IfcLabel): string | undefined => (lbl?.name ?? lbl?.id ?? undefined);
+export const toIfcLabel = (rt: RuntimeLabel): IfcLabel => {
+  // always preserve id + name
+  return { ifc: true, id: rt.id, name: rt.name };
+};
+export const fromIfcLabel = (lbl: IfcLabel): string | undefined => {
+  if (!lbl) return undefined;
+  if (typeof lbl === 'string') return lbl;
+  if ('id' in lbl) return (lbl as any).id;
+  if ('name' in lbl) {
+    return (lbl as any).name.toLowerCase().replace(/\s+/g, '-');
+  }
+  return undefined;
+};

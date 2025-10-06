@@ -1,39 +1,50 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactFlow, { Background, Controls, Node, Edge, applyNodeChanges, NodeChange } from 'reactflow';
 import { Card, CardContent, IconButton, Typography } from '@mui/material';
-import { Lattice } from '../models/Lattice';
+import type { Lattice } from '../models/Lattice';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import UndoIcon from '@mui/icons-material/Undo';
 
-export default function LatticeGraph({ lattice }: { lattice: Lattice }) {
-  const initialNodes: Node[] = useMemo(
-    () =>
-      Object.values(lattice.labels).map((l, idx) => ({
-        id: l.id,
-        data: { label: l.name },
-        position: { x: (idx % 5) * 160, y: Math.floor(idx / 5) * 100 }
-      })),
-    [lattice]
-  );
-  const initialEdges: Edge[] = useMemo(
-    () => lattice.edges.map((e, i) => ({ id: String(i), source: e.from, target: e.to, animated: true })),
-    [lattice]
-  );
+type LatticeGraphProps = {
+  lattice: Lattice;
+  onReset?: () => void;
+  onUndo?: () => void;
+  canUndo?: boolean;
+};
 
-  const [nodes, setNodes] = useState<Node[]>(initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges);
+export default function LatticeGraph({ lattice, onReset, onUndo, canUndo }: LatticeGraphProps) {
+  const buildNodes = useCallback((): Node[] => (
+    Object.values(lattice.labels).map((l, idx) => ({
+      id: l.id,
+      data: { label: l.name },
+      position: { x: (idx % 5) * 160, y: Math.floor(idx / 5) * 100 }
+    }))
+  ), [lattice]);
+
+  const buildEdges = useCallback((): Edge[] => (
+    lattice.edges.map((e, i) => ({ id: String(i), source: e.from, target: e.to, animated: true }))
+  ), [lattice]);
+
+  const [nodes, setNodes] = useState<Node[]>(() => buildNodes());
+  const [edges, setEdges] = useState<Edge[]>(() => buildEdges());
 
   useEffect(() => {
-    setNodes(initialNodes);
-  }, [initialNodes]);
+    setNodes(buildNodes());
+  }, [buildNodes]);
 
   useEffect(() => {
-    setEdges(initialEdges);
-  }, [initialEdges]);
+    setEdges(buildEdges());
+  }, [buildEdges]);
 
-  const onReset = useCallback(() => {
-    setNodes([...initialNodes]);
-    setEdges([...initialEdges]);
-  }, [initialNodes, initialEdges]);
+  const handleReset = useCallback(() => {
+    setNodes([]);
+    setEdges([]);
+    onReset?.();
+  }, [onReset]);
+
+  const handleUndo = useCallback(() => {
+    onUndo?.();
+  }, [onUndo]);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => setNodes(nds => applyNodeChanges(changes, nds)),
@@ -48,7 +59,7 @@ export default function LatticeGraph({ lattice }: { lattice: Lattice }) {
           <IconButton
             size="small"
             aria-label="reset lattice layout"
-            onClick={onReset}
+            onClick={handleReset}
             sx={{
               position: 'absolute',
               top: 12,
@@ -60,6 +71,23 @@ export default function LatticeGraph({ lattice }: { lattice: Lattice }) {
             }}
           >
             <RefreshIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            aria-label="undo lattice change"
+            onClick={handleUndo}
+            disabled={!canUndo}
+            sx={{
+              position: 'absolute',
+              top: 12,
+              right: 52,
+              zIndex: 10,
+              bgcolor: 'background.paper',
+              boxShadow: 1,
+              '&:hover': { bgcolor: 'background.paper' }
+            }}
+          >
+            <UndoIcon fontSize="small" />
           </IconButton>
           <ReactFlow nodes={nodes} edges={edges} fitView nodesDraggable onNodesChange={onNodesChange}>
             <Background />

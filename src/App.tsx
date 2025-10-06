@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Box, Container, Divider, Grid2 as Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
-import { emptyLattice, join as rtJoin, leq as rtLeq } from './models/Lattice';
+import { emptyLattice } from './models/Lattice';
+import type { Lattice } from './models/Lattice';
 import { RuntimeLabel } from './models/Label';
 import LabelEditor from './components/LabelEditor';
 import SourceFetcher from './components/SourceFetcher';
@@ -9,11 +10,11 @@ import FlowVisualizer from './components/FlowVisualizer';
 import PresetLatticeLoader from './components/PresetLatticeLoader';
 import SinkPanel from './components/SinkPanel';
 import ExplanationPanel from './components/ExplanationPanel';
-import { emptyGraph, FlowGraph } from './models/FlowGraph';
-import { fromIfcLabel, join as ifcJoin, leq as ifcLeq, mkIfcLabel, toIfcLabel } from './ifcClient';
+import { emptyGraph } from './models/FlowGraph';
+import type { FlowGraph } from './models/FlowGraph';
+import { fromIfcLabel, leq as ifcLeq, mkIfcLabel, toIfcLabel } from './ifcClient';
 import LatticeGraph from './components/LatticeGraph';
 import CustomLatticeLoader from './components/CustomLatticeLoader';
-import { Label } from '@mui/icons-material';
 
 type Src = {
   id: string;
@@ -26,15 +27,51 @@ type Src = {
 
 type Sink = { id: string; name: string; label: RuntimeLabel; };
 
-export default function App() {
-  const [lattice, setLattice] = useState(emptyLattice());
-  const [sources, setSources] = useState<Src[]>([]);
-  const [sinks, setSinks] = useState<Sink[]>([]);
-  const [graph, setGraph] = useState<FlowGraph>(emptyGraph());
-  const [expl, setExpl] = useState<string[]>([]);
+type Snapshot = {
+  lattice: Lattice;
+  sources: Src[];
+  sinks: Sink[];
+  graph: FlowGraph;
+  expl: string[];
+};
 
-  // helper: push explanation
-  const explain = (s: string) => setExpl(prev => [s, ...prev].slice(0, 50));
+export default function App() {
+  const [lattice, setLatticeState] = useState(emptyLattice());
+  const [sources, setSourcesState] = useState<Src[]>([]);
+  const [sinks, setSinksState] = useState<Sink[]>([]);
+  const [graph, setGraphState] = useState<FlowGraph>(emptyGraph());
+  const [expl, setExplState] = useState<string[]>([]);
+  const [history, setHistory] = useState<Snapshot[]>([]);
+
+  const runAction = useCallback((action: () => void) => {
+    setHistory(prev => [...prev, {
+      lattice,
+      sources,
+      sinks,
+      graph,
+      expl
+    }]);
+    action();
+  }, [lattice, sources, sinks, graph, expl]);
+
+  const pushExplanation = useCallback((s: string) => {
+    setExplState(prev => [s, ...prev].slice(0, 50));
+  }, []);
+
+  const undo = useCallback(() => {
+    setHistory(prev => {
+      if (!prev.length) return prev;
+      const snapshot = prev[prev.length - 1];
+      setLatticeState(snapshot.lattice);
+      setSourcesState(snapshot.sources);
+      setSinksState(snapshot.sinks);
+      setGraphState(snapshot.graph);
+      setExplState(snapshot.expl);
+      return prev.slice(0, -1);
+    });
+  }, []);
+
+  const canUndo = history.length > 0;
 
   // helpter: tabs
   const [value, setValue] = useState(0);
@@ -72,41 +109,51 @@ export default function App() {
 
   // add a source
   const onCreateSource = (s: { id: string; value: string; rtLabel: RuntimeLabel; ifcLabel: any; lio: any; }) => {
-    const title = `source(${s.rtLabel.name})`;
-    const nodeId = s.id;
-    setSources(prev => [...prev, { id: nodeId, title, value: s.value, rtLabel: s.rtLabel, ifcLabel: s.ifcLabel, lio: s.lio }]);
-    setGraph(prev => ({
-      nodes: [...prev.nodes, {
-        id: nodeId,
-        kind: 'source',
-        position: { x: 40 + prev.nodes.length * 40, y: 60 },
-        data: { title, value: s.value, label: s.rtLabel }
-      }],
-      edges: [...prev.edges]
-    }));
-    explain(`Created source with value="${s.value}" and label ${s.rtLabel.name}.`);
+    runAction(() => {
+      const title = `source(${s.rtLabel.name})`;
+      const nodeId = s.id;
+      setSourcesState(prev => [...prev, { id: nodeId, title, value: s.value, rtLabel: s.rtLabel, ifcLabel: s.ifcLabel, lio: s.lio }]);
+      setGraphState(prev => ({
+        nodes: [...prev.nodes, {
+          id: nodeId,
+          kind: 'source',
+          position: { x: 40 + prev.nodes.length * 40, y: 60 },
+          data: { title, value: s.value, label: s.rtLabel }
+        }],
+        edges: [...prev.edges]
+      }));
+      pushExplanation(`Created source with value="${s.value}" and label ${s.rtLabel.name}.`);
+    });
   };
 
   // add map/combine nodes
   const onCompose = (node: {
     id: string; title: string; labelName: string; value: unknown; kind: 'map' | 'combine'; parents: string[];
   }) => {
-    const rt = Object.values(lattice.labels).find(l => l.id === node.labelName) ?? { id: node.labelName, name: node.labelName };
-    setGraph(prev => ({
-      nodes: [...prev.nodes, {
-        id: node.id,
-        kind: node.kind,
-        position: { x: 160 + prev.nodes.length * 40, y: 180 },
-        data: { title: node.title, value: node.value, label: rt }
-      }],
-      edges: [...prev.edges, ...node.parents.map((p, i) => ({ id: `${node.id}-${i}`, from: p, to: node.id, label: node.kind }))]
-    }));
-    explain(`${node.kind === 'map' ? 'Mapped' : 'Combined'} → new node label approximated as ${rt.name}.`);
+    const rt = Object.values(lattice.labels).find(l => l.id === node.labelName) 
+        ?? { 
+             id: node.labelName.toLowerCase().replace(/\s+/g, '-'), 
+             name: node.labelName 
+           };
+    runAction(() => {
+      setGraphState(prev => ({
+        nodes: [...prev.nodes, {
+          id: node.id,
+          kind: node.kind,
+          position: { x: 160 + prev.nodes.length * 40, y: 180 },
+          data: { title: node.title, value: node.value, label: rt }
+        }],
+        edges: [...prev.edges, ...node.parents.map((p, i) => ({ id: `${node.id}-${i}`, from: p, to: node.id, label: node.kind }))]
+      }));
+      pushExplanation(`${node.kind === 'map' ? 'Mapped' : 'Combined'} → new node label approximated as ${rt.name}.`);
+    });
   };
 
   const onCreateSink = (s: Sink) => {
-    setSinks(prev => [...prev, s]);
-    explain(`Created sink "${s.name}" with label ${s.label.name}.`);
+    runAction(() => {
+      setSinksState(prev => [...prev, s]);
+      pushExplanation(`Created sink "${s.name}" with label ${s.label.name}.`);
+    });
   };
 
   // attempt to write into a sink: check leq(valueLabel, sinkLabel)
@@ -117,31 +164,58 @@ export default function App() {
     const current = graph.nodes.at(-1);
     if (!current) return;
 
-    const vLblIfc = mkIfcLabel(current.data.label.name);
+    const vLblIfc = toIfcLabel(current.data.label);
     const sLblIfc = toIfcLabel(sink.label);
     const ok = ifcLeq(lattice, vLblIfc, sLblIfc, fromIfcLabel);
+    console.log("Checking leq:",
+      fromIfcLabel(vLblIfc),
+      "≤",
+      fromIfcLabel(sLblIfc)
+    );
 
-    // decorate the edge & node
-    setGraph(prev => {
-      const e = { id: `${current.id}->sink-${sink.id}`, from: current.id, to: `sink-${sink.id}`, label: 'write', violation: !ok };
-      const sinkNode = {
-        id: `sink-${sink.id}`,
-        kind: 'sink' as const,
-        position: { x: current.position.x + 240, y: current.position.y },
-        data: { title: `sink(${sink.name})`, label: sink.label, violation: !ok }
-      };
-      // include sink node once
-      const nodes = prev.nodes.some(n => n.id === sinkNode.id) ? prev.nodes : [...prev.nodes, sinkNode];
-      const edges = [...prev.edges, e];
-      return { nodes, edges };
+    runAction(() => {
+      setGraphState(prev => {
+        const e = { id: `${current.id}->sink-${sink.id}`, from: current.id, to: `sink-${sink.id}`, label: 'write', violation: !ok };
+        const sinkNode = {
+          id: `sink-${sink.id}`,
+          kind: 'sink' as const,
+          position: { x: current.position.x + 240, y: current.position.y },
+          data: { title: `sink(${sink.name})`, label: sink.label, violation: !ok }
+        };
+        const nodes = prev.nodes.some(n => n.id === sinkNode.id) ? prev.nodes : [...prev.nodes, sinkNode];
+        const edges = [...prev.edges, e];
+        return { nodes, edges };
+      });
+
+      if (ok) {
+        pushExplanation(`Allowed: value label = ${current.data.label.name} ≤ sink label = ${sink.label.name}. Flow permitted.`);
+      } else {
+        pushExplanation(`Rejected: join(${current.data.label.name}) ⊑ ${sink.label.name} is false → flow blocked.`);
+      }
     });
-
-    if (ok) {
-      explain(`Allowed: value label = ${current.data.label.name} ≤ sink label = ${sink.label.name}. Flow permitted.`);
-    } else {
-      explain(`Rejected: join(${current.data.label.name}) ⊑ ${sink.label.name} is false → flow blocked.`);
-    }
   };
+
+  const handleLatticeChange = useCallback((lat: Lattice) => {
+    runAction(() => {
+      setLatticeState(lat);
+    });
+  }, [runAction]);
+
+  const clearLattice = useCallback(() => {
+    runAction(() => {
+      setLatticeState(emptyLattice());
+      setSourcesState([]);
+      setSinksState([]);
+      setGraphState(emptyGraph());
+      setExplState([]);
+    });
+  }, [runAction]);
+
+  const clearFlow = useCallback(() => {
+    runAction(() => {
+      setGraphState(emptyGraph());
+    });
+  }, [runAction]);
 
   return (
     <Container sx={{ py: 3 }}>
@@ -149,15 +223,26 @@ export default function App() {
       <Typography variant="body1" sx={{ mb: 2 }}>
         Explore label-based IFC: define a lattice, create labeled sources (LIO), compose flows, and try writes to sinks.
       </Typography>
+      <Grid container spacing={2} padding={1}>
+        <Paper variant="outlined">
+          <Typography variant="subtitle2">What’s enforced?</Typography>
+          <Typography variant="body2">
+            - **Label propagation**: combining sources computes a join label (via <code>ifc-ts</code> when exposed, else runtime lattice).<br/>
+            - **Sinks**: writing a value with label ℓ<sub>v</sub> to a sink with label ℓ<sub>s</sub> requires <code>leq(ℓv, ℓs)</code>.<br/>
+            - **Violations**: attempted writes where <code>leq</code> fails are marked in red with an explanation.
+          </Typography>
+        </Paper>
+        <Divider sx={{ my: 3 }} />
+      </Grid>
 
       <Grid container spacing={2} padding={1}>
 
-        <Grid spacing={2} size={12}>
-          <LatticeGraph lattice={lattice} />
+        <Grid size={12}>
+          <LatticeGraph lattice={lattice} onReset={clearLattice} onUndo={undo} canUndo={canUndo} />
         </Grid>
 
-        <Grid spacing={2} size={12}>
-          <FlowVisualizer graph={graph} />
+        <Grid size={12}>
+          <FlowVisualizer graph={graph} onReset={clearFlow} onUndo={undo} canUndo={canUndo} />
         </Grid>
 
       </Grid>
@@ -175,17 +260,17 @@ export default function App() {
             </Box>
             {/* Tab content */}
             <CustomTabPanel value={value} index={0}>
-              <PresetLatticeLoader onLoad={setLattice} />
+              <PresetLatticeLoader onLoad={handleLatticeChange} />
             </CustomTabPanel>
 
             <CustomTabPanel value={value} index={1}>
-              <CustomLatticeLoader lattice={lattice} onChange={setLattice} />
+              <CustomLatticeLoader lattice={lattice} onChange={handleLatticeChange} />
             </CustomTabPanel>
           </Box>
         </Grid>
 
         <Grid size={8}>
-          <LabelEditor lattice={lattice} onChange={setLattice} />
+          <LabelEditor lattice={lattice} onChange={handleLatticeChange} />
         </Grid>
 
 
@@ -211,18 +296,6 @@ export default function App() {
           <ExplanationPanel lines={expl} />
         </Grid>
 
-      </Grid>
-
-      <Grid container spacing={2} size={12}>
-        <Paper variant="outlined">
-          <Typography variant="subtitle2">What’s enforced?</Typography>
-          <Typography variant="body2">
-            - **Label propagation**: combining sources computes a join label (via <code>ifc-ts</code> when exposed, else runtime lattice).<br/>
-            - **Sinks**: writing a value with label ℓ<sub>v</sub> to a sink with label ℓ<sub>s</sub> requires <code>leq(ℓv, ℓs)</code>.<br/>
-            - **Violations**: attempted writes where <code>leq</code> fails are marked in red with an explanation.
-          </Typography>
-        </Paper>
-        <Divider sx={{ my: 3 }} />
       </Grid>
 
     </Container>
