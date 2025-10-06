@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Box, Container, Divider, Grid2 as Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Chip, Container, Divider, Grid2 as Grid, List, ListItem, ListItemText, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { emptyLattice } from './models/Lattice';
 import type { Lattice } from './models/Lattice';
 import { RuntimeLabel } from './models/Label';
@@ -221,16 +221,29 @@ export default function App() {
     <Container sx={{ py: 3 }}>
       <Typography variant="h4" gutterBottom>ifc-ts Interactive Demo</Typography>
       <Typography variant="body1" sx={{ mb: 2 }}>
-        Explore label-based IFC: define a lattice, create labeled sources (LIO), compose flows, and try writes to sinks.
+        Explore label-based IFC: define a lattice, create Labeled IO, compose flows, and try writes to sinks.
       </Typography>
-      <Grid container spacing={2} padding={1}>
-        <Paper variant="outlined">
-          <Typography variant="subtitle2">What’s enforced?</Typography>
-          <Typography variant="body2">
-            - **Label propagation**: combining sources computes a join label (via <code>ifc-ts</code> when exposed, else runtime lattice).<br/>
-            - **Sinks**: writing a value with label ℓ<sub>v</sub> to a sink with label ℓ<sub>s</sub> requires <code>leq(ℓv, ℓs)</code>.<br/>
-            - **Violations**: attempted writes where <code>leq</code> fails are marked in red with an explanation.
+      <Grid container padding={1}>
+        <Paper variant='outlined'>
+          <Typography variant="subtitle2" gutterBottom>
+            Enforcement Rules
           </Typography>
+
+          <Stack spacing={0.5}>
+  <Typography variant="body2">
+    <Chip size="small" label="Label propagation" sx={{ mr: 1 }} />
+    Combine sources → join label (<code>ifc-ts</code> or runtime lattice)
+  </Typography>
+  <Typography variant="body2">
+    <Chip size="small" label="Sinks" sx={{ mr: 1 }} />
+    Write allowed if <code>leq(ℓv, ℓs)</code>
+  </Typography>
+  <Typography variant="body2">
+    <Chip size="small" label="Violations" sx={{ mr: 1 }} />
+    Failed <code>leq</code> → red + explanation
+  </Typography>
+</Stack>
+
         </Paper>
         <Divider sx={{ my: 3 }} />
       </Grid>
@@ -273,7 +286,6 @@ export default function App() {
           <LabelEditor lattice={lattice} onChange={handleLatticeChange} />
         </Grid>
 
-
         <Grid size={12}>
           <SourceFetcher lattice={lattice} onCreate={onCreateSource} />
         </Grid>
@@ -295,9 +307,7 @@ export default function App() {
         <Grid size={4}>
           <ExplanationPanel lines={expl} />
         </Grid>
-
       </Grid>
-
     </Container>
   );
 }
