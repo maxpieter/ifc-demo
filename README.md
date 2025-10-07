@@ -8,6 +8,9 @@ This demo lets you:
 - Define sinks with required labels and test writes against IFC rules.  
 - Visualize flows, violations, and explanations using React Flow.
 
+<img width="1388" height="905" alt="image" src="https://github.com/user-attachments/assets/f0fe360d-eac8-4327-a54a-bd1d12c39142" />
+
+
 ---
 
 ## Getting Started
