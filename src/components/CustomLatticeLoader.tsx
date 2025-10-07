@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   Button, Card, CardContent, Grid2 as Grid, MenuItem, Select, Stack, TextField, Typography
 } from '@mui/material';
-import { addLabel, addLeq, emptyLattice, Lattice } from '../models/Lattice';
+import { addLabel, addLeq, Lattice } from '../models/Lattice';
 import { makeLabel, RuntimeLabel } from '../models/Label';
 
  export interface LabelEditorProps {
@@ -32,11 +32,10 @@ return (
   <Grid container spacing={2}>
   <Card variant="outlined">
         <CardContent>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={3}>
             <TextField label="New label (e.g. High)" value={name}
               onChange={e => setName(e.target.value)} size="small" />
             <Button variant="contained" onClick={addNew}>Add</Button>
-            <Button variant="text" color="warning" onClick={() => onChange(emptyLattice())}>Reset</Button>
           </Stack>
         </CardContent>
       </Card>
@@ -44,9 +43,9 @@ return (
       <Card variant="outlined">
         <CardContent>
           <Typography variant="body2" paddingBottom={2}>
-            Tip: ids are auto-generated from names (e.g., <code>Secret</code> → <code>secret</code>).
+            Define ≤ relations between existing labels:
           </Typography>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={0.5}>
             <Select
               size="small"
               value={low}
@@ -54,34 +53,17 @@ return (
               onChange={e => setLow(e.target.value)}
               renderValue={(selected) => {
                 if (selected === '') {
-                  return <em>Select Low</em>;
+                  return <em>Low</em>;
                 }
                 return labelsArr.find(l => l.id === selected)?.name || selected;
               }}
-              sx={{ minWidth: 140 }}
-            >
-              <MenuItem disabled value="">
-                <em>Select Low</em>
-              </MenuItem>
-              {labelsArr.map(l => (
-                <MenuItem key={l.id} value={l.id}>
-                  {l.name}
-                </MenuItem>
-              ))}
-            </Select>
-
-            <Select
-              size="small"
-              value={high}
-              displayEmpty
-              onChange={e => setHigh(e.target.value)}
-              renderValue={(selected) => {
-                if (selected === '') {
-                  return <em>Select High</em>;
-                }
-                return labelsArr.find(l => l.id === selected)?.name || selected;
+              sx={{
+                minWidth: 100,        // reduce width
+                fontSize: '0.75rem',  // smaller font
+                '& .MuiSelect-select': {
+                  py: 0.25,           // less vertical padding inside
+                },
               }}
-              sx={{ minWidth: 140, fontSize: '0.8rem' }}
               MenuProps={{
                 PaperProps: {
                   sx: {
@@ -92,7 +74,7 @@ return (
               }}
             >
               <MenuItem disabled value="" sx={{ fontSize: '0.8rem', py: 0.5 }}>
-                <em>Select High</em>
+                <em>Low</em>
               </MenuItem>
               {labelsArr.map(l => (
                 <MenuItem key={l.id} value={l.id} sx={{ fontSize: '0.8rem', py: 0.5 }}>
@@ -100,7 +82,43 @@ return (
                 </MenuItem>
               ))}
             </Select>
-            <Button variant="outlined" onClick={addEdge}>Add ≤ relation</Button>
+            <Select
+              size="small"
+              value={high}
+              displayEmpty
+              onChange={e => setHigh(e.target.value)}
+              sx={{
+                minWidth: 100,        // reduce width
+                fontSize: '0.75rem',  // smaller font
+                '& .MuiSelect-select': {
+                  py: 0.25,           // less vertical padding inside
+                },
+              }}
+              renderValue={(selected) => {
+                if (selected === '') {
+                  return <em>High</em>;
+                }
+                return labelsArr.find(l => l.id === selected)?.name || selected;
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 50,       // set dropdown width
+                    maxHeight: 100,   // control dropdown height
+                  },
+                },
+              }}
+            >
+              <MenuItem disabled value="" sx={{ fontSize: '0.8rem', py: 0.5 }}>
+                <em>High</em>
+              </MenuItem>
+              {labelsArr.map(l => (
+                <MenuItem key={l.id} value={l.id} sx={{ fontSize: '0.8rem', py: 0.5 }}>
+                  {l.name}
+                </MenuItem>
+              ))}
+            </Select>
+            <Button variant="outlined" onClick={addEdge} size='small'>Add ≤ relation</Button>
           </Stack>
         </CardContent>
       </Card>

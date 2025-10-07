@@ -265,28 +265,29 @@ export default function App() {
 
       <Grid container spacing={2} padding={1} sx={{ alignItems: 'stretch' }}>
         <Grid size={4}>
+          {/* Tabs header */}
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            aria-label="lattice editor tabs"
+            centered
+          >
+            <Tab label="Preset Lattice" {...a11yProps(0)} />
+            <Tab label="Custom Lattice" {...a11yProps(1)} />
+          </Tabs>
 
-          <Box sx={{ width: '100%' }}>
-            {/* Tabs header */}
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={value} onChange={handleChange} aria-label="lattice editor tabs" centered>
-                <Tab label="Preset Lattice" {...a11yProps(0)} />
-                <Tab label="Custom Lattice" {...a11yProps(1)} />
-              </Tabs>
-            </Box>
-            {/* Tab content */}
-            <CustomTabPanel value={value} index={0}>
-              <PresetLatticeLoader onLoad={handleLatticeChange} />
-            </CustomTabPanel>
+          {/* Tab content */}
+          <CustomTabPanel value={value} index={0}>
+            <PresetLatticeLoader onLoad={handleLatticeChange} />
+          </CustomTabPanel>
 
-            <CustomTabPanel value={value} index={1}>
-              <CustomLatticeLoader lattice={lattice} onChange={handleLatticeChange} />
-            </CustomTabPanel>
-          </Box>
+          <CustomTabPanel value={value} index={1}>
+            <CustomLatticeLoader lattice={lattice} onChange={handleLatticeChange} />
+          </CustomTabPanel>
         </Grid>
 
         <Grid size={8}>
-          <LatticeGraph lattice={lattice} onReset={clearLattice} onUndo={undo} canUndo={canUndo} />
+          <LatticeGraph lattice={lattice} onReset={emptyLattice} onUndo={undo} canUndo={canUndo} />
         </Grid>
 
         <Grid size={8}>
@@ -318,8 +319,7 @@ export default function App() {
         </Grid>
 
 
-
-         <Grid size={8} sx={{ display: 'flex' }}>
+        <Grid size={8} sx={{ display: 'flex' }}>
           <FlowVisualizer graph={graph} onReset={clearFlow} onUndo={undo} canUndo={canUndo} />
         </Grid>
 

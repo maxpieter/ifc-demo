@@ -51,7 +51,7 @@ export default function SinkPanel({
         </Stack>
 
         <Typography variant="subtitle2">Available sinks</Typography>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
           {sinks.map(s => (
             <Stack key={s.id} direction="row" spacing={0.5} alignItems="center">
               <Button variant="contained" onClick={() => onTryWrite(s.id)}>
