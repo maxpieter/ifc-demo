@@ -183,11 +183,6 @@ export default function App() {
     const vLblIfc = toIfcLabel(current.data.label);
     const sLblIfc = toIfcLabel(sink.label);
     const ok = ifcLeq(lattice, vLblIfc, sLblIfc, fromIfcLabel);
-    console.log("Checking leq:",
-      fromIfcLabel(vLblIfc),
-      "≤",
-      fromIfcLabel(sLblIfc)
-    );
 
     runAction(() => {
       setGraphState(prev => {

@@ -47,11 +47,8 @@ export default function FlowComposer({
 
     // Use ifc-ts join if available; else runtime
     const jIfc = join(lattice, a.ifcLabel, b.ifcLabel, fromIfcLabel);
-    console.log('join ifc-ts:', jIfc);
     const jName = jIfc ? (fromIfcLabel(jIfc) ?? 'unknown') : (rtJoin(lattice, a.labelId, b.labelId) ?? 'unknown');
-    console.log('join runtime:', jName);
     const value = `${a.value} + ${b.value}`;
-    console.log('combined value:', value);
 
     onNode({
       id: crypto.randomUUID(),
