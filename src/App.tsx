@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Box, Chip, Container, Divider, Grid2 as Grid, List, ListItem, ListItemText, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Container, Divider, Grid2 as Grid, Tab, Tabs, Typography } from '@mui/material';
 import { emptyLattice } from './models/Lattice';
 import type { Lattice } from './models/Lattice';
 import { RuntimeLabel } from './models/Label';
@@ -318,23 +318,25 @@ export default function App() {
             canWrite={Boolean(selectedNode && selectedNode.kind !== 'sink')}
           />
         </Grid>
+        
 
-
-        <Grid size={8} sx={{ display: 'flex' }}>
-          <FlowVisualizer
-            graph={graph}
-            onReset={clear}
-            onUndo={undo}
-            canUndo={canUndo}
-            selectedNodeId={selectedNodeId}
-            onSelectNode={handleSelectNode}
-          />
-        </Grid>
-
-        <Grid size={4} sx={{ display: 'flex' }}>
-          <ExplanationPanel lines={expl} />
-        </Grid>
       </Grid>
+        <Grid container spacing={2} sx={{ alignItems: 'stretch', height: 520 }}>
+          <Grid size={8} sx={{ display: 'flex', height: '100%' }}>
+            <FlowVisualizer
+              graph={graph}
+              onReset={clear}
+              onUndo={undo}
+              canUndo={canUndo}
+              selectedNodeId={selectedNodeId}
+              onSelectNode={handleSelectNode}
+            />
+          </Grid>
+
+          <Grid size={4} sx={{ display: 'flex', height: '100%' }}>
+            <ExplanationPanel lines={expl} />
+          </Grid>
+        </Grid>
     </Container>
   );
 }
