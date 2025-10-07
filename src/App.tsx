@@ -262,7 +262,7 @@ export default function App() {
       </Grid>
         <Divider sx={{ my: 3 }} />
 
-      <Grid container spacing={2} padding={1} sx={{ alignItems: 'stretch' }}>
+      <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
         <Grid size={4}>
           {/* Tabs header */}
           <Tabs
@@ -321,7 +321,7 @@ export default function App() {
         
 
       </Grid>
-        <Grid container spacing={2} sx={{ alignItems: 'stretch', height: 520 }}>
+        <Grid container spacing={2} paddingTop={2} sx={{ alignItems: 'stretch', height: 520 }}>
           <Grid size={8} sx={{ display: 'flex', height: '100%' }}>
             <FlowVisualizer
               graph={graph}
