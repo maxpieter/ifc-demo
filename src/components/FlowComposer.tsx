@@ -24,7 +24,7 @@ export default function FlowComposer({
   const [left, setLeft] = useState<string>('');    
   const [right, setRight] = useState<string>('');  
   const [mapSrc, setMapSrc] = useState<string>('');
-  const [mapSuffix, setMapSuffix] = useState('+ new information');
+  const [mapSuffix, setMapSuffix] = useState(' Bar');
 
   const mapAction = () => {
     const s = sources.find(x => x.id === mapSrc);
@@ -32,7 +32,7 @@ export default function FlowComposer({
     const mapped = map(s.lio, (v: string) => v + mapSuffix);
     onNode({
       id: crypto.randomUUID(),
-      title: `map (${s.title})`,
+      title: `${mapped.value}`,
       labelName: fromIfcLabel(mapped.label) ?? s.labelId,
       value: mapped.value,
       kind: 'map',
@@ -52,7 +52,7 @@ export default function FlowComposer({
 
     onNode({
       id: crypto.randomUUID(),
-      title: `${a.value}, ${b.title}`,
+      title: `${a.value}, ${b.value}`,
       labelName: jName,
       value,
       kind: 'combine',

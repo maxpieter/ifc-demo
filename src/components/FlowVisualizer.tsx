@@ -30,7 +30,7 @@ export default function FlowVisualizer({ graph, onReset, onUndo, canUndo }: Flow
       return {
         id: n.id,
         position: n.position,
-        data: { label: `${n.data.title}\n[label=${n.data.label.name}]${violation ? ' ⚠' : ''}` },
+        data: { label: `${n.data.value, n.data.title}\n[label=${n.data.label.name}]${violation ? ' ⚠' : ''}` },
         style: {
           border: `2px solid ${borderColor}`,
           background: backgroundColor,

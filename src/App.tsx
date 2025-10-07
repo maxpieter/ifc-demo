@@ -191,7 +191,7 @@ export default function App() {
           id: `sink-${sink.id}`,
           kind: 'sink' as const,
           position: { x: current.position.x + 240, y: current.position.y },
-          data: { title: `sink(${sink.name})`, label: sink.label, violation: !ok }
+          data: { title: `${sink.name}`, label: sink.label, violation: !ok }
         };
         const nodes = prev.nodes.some(n => n.id === sinkNode.id) ? prev.nodes : [...prev.nodes, sinkNode];
         const edges = [...prev.edges, e];

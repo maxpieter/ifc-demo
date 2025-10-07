@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, Card, CardContent, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Button, Card, CardContent, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { Lattice } from '../models/Lattice';
 import { RuntimeLabel } from '../models/Label';
 import { pure, toIfcLabel } from '../ifcClient';
@@ -16,7 +16,7 @@ export default function SourceFetcher({
   lattice, onCreate
 }: { lattice: Lattice; onCreate: (s: SourceCard) => void; }) {
   const labels = useMemo(() => Object.values(lattice.labels), [lattice]);
-  const [value, setValue] = useState('dummy data');
+  const [value, setValue] = useState('Foo');
   const [labelId, setLabelId] = useState<string>('');
 
   const create = () => {
