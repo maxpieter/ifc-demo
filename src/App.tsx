@@ -156,6 +156,21 @@ export default function App() {
     });
   };
 
+  const onRemoveSink = (sinkId: string) => {
+    const sink = sinks.find(s => s.id === sinkId);
+    if (!sink) return;
+    runAction(() => {
+      setSinksState(prev => prev.filter(s => s.id !== sinkId));
+      setGraphState(prev => {
+        const targetId = `sink-${sinkId}`;
+        const nodes = prev.nodes.filter(n => n.id !== targetId);
+        const edges = prev.edges.filter(e => e.from !== targetId && e.to !== targetId);
+        return { nodes, edges };
+      });
+      pushExplanation(`Removed sink "${sink.name}".`);
+    });
+  };
+
   // attempt to write into a sink: check leq(valueLabel, sinkLabel)
   const onTryWrite = (sinkId: string) => {
     const sink = sinks.find(s => s.id === sinkId);
@@ -230,34 +245,22 @@ export default function App() {
           </Typography>
 
           <Stack spacing={0.5}>
-  <Typography variant="body2">
-    <Chip size="small" label="Label propagation" sx={{ mr: 1 }} />
-    Combine sources → join label (<code>ifc-ts</code> or runtime lattice)
-  </Typography>
-  <Typography variant="body2">
-    <Chip size="small" label="Sinks" sx={{ mr: 1 }} />
-    Write allowed if <code>leq(ℓv, ℓs)</code>
-  </Typography>
-  <Typography variant="body2">
-    <Chip size="small" label="Violations" sx={{ mr: 1 }} />
-    Failed <code>leq</code> → red + explanation
-  </Typography>
-</Stack>
+            <Typography variant="body2">
+              <Chip size="small" label="Label propagation" sx={{ mr: 1 }} />
+              Combine sources → join label (<code>ifc-ts</code> or runtime lattice)
+            </Typography>
+            <Typography variant="body2">
+              <Chip size="small" label="Sinks" sx={{ mr: 1 }} />
+              Write allowed if <code>leq(ℓv, ℓs)</code>
+            </Typography>
+            <Typography variant="body2">
+              <Chip size="small" label="Violations" sx={{ mr: 1 }} />
+              Failed <code>leq</code> → red + explanation
+            </Typography>
+          </Stack>
 
         </Paper>
         <Divider sx={{ my: 3 }} />
-      </Grid>
-
-      <Grid container spacing={2} padding={1}>
-
-        <Grid size={12}>
-          <LatticeGraph lattice={lattice} onReset={clearLattice} onUndo={undo} canUndo={canUndo} />
-        </Grid>
-
-        <Grid size={12}>
-          <FlowVisualizer graph={graph} onReset={clearFlow} onUndo={undo} canUndo={canUndo} />
-        </Grid>
-
       </Grid>
 
       <Grid container spacing={2} padding={1}>
@@ -283,6 +286,10 @@ export default function App() {
         </Grid>
 
         <Grid size={8}>
+          <LatticeGraph lattice={lattice} onReset={clearLattice} onUndo={undo} canUndo={canUndo} />
+        </Grid>
+
+        <Grid size={8}>
           <LabelEditor lattice={lattice} onChange={handleLatticeChange} />
         </Grid>
 
@@ -290,7 +297,7 @@ export default function App() {
           <SourceFetcher lattice={lattice} onCreate={onCreateSource} />
         </Grid>
 
-        <Grid size={12}>
+        <Grid size={8}>
           <FlowComposer
               lattice={lattice}
               sources={sources.map(s => ({
@@ -300,12 +307,24 @@ export default function App() {
               />
         </Grid>
 
-        <Grid size={6}>
-          <SinkPanel lattice={lattice} sinks={sinks} onCreate={onCreateSink} onTryWrite={onTryWrite} />
+        <Grid size={4}>
+          <SinkPanel
+            lattice={lattice}
+            sinks={sinks}
+            onCreate={onCreateSink}
+            onTryWrite={onTryWrite}
+            onRemove={onRemoveSink}
+          />
         </Grid>
         
+        
+
+         <Grid size={8}>
+          <FlowVisualizer graph={graph} onReset={clearFlow} onUndo={undo} canUndo={canUndo} />
+        </Grid>
+
         <Grid size={4}>
-          <ExplanationPanel lines={expl} />
+          <ExplanationPanel lines={expl}/>
         </Grid>
       </Grid>
     </Container>

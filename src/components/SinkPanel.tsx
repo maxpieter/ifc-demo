@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Button, Card, CardContent, MenuItem, Stack, TextField, Typography, Alert } from '@mui/material';
+import { Button, Card, CardContent, MenuItem, Stack, TextField, Typography, IconButton } from '@mui/material';
 import { Lattice } from '../models/Lattice';
 import { RuntimeLabel } from '../models/Label';
-import { leq, toIfcLabel, fromIfcLabel } from '../ifcClient';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export interface SinkDef {
   id: string;
@@ -14,12 +14,14 @@ export default function SinkPanel({
   lattice,
   sinks,
   onCreate,
-  onTryWrite
+  onTryWrite,
+  onRemove
 }: {
   lattice: Lattice;
   sinks: SinkDef[];
   onCreate: (s: SinkDef) => void;
   onTryWrite: (sinkId: string) => void;
+  onRemove: (sinkId: string) => void;
 }) {
   const labels = useMemo(() => Object.values(lattice.labels), [lattice]);
   const [name, setName] = useState('Console');
@@ -51,9 +53,14 @@ export default function SinkPanel({
         <Typography variant="subtitle2" sx={{ mt: 2 }}>Available sinks</Typography>
         <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
           {sinks.map(s => (
-            <Button key={s.id} variant="contained" onClick={() => onTryWrite(s.id)}>
-              Write to {s.name} [{s.label.name}]
-            </Button>
+            <Stack key={s.id} direction="row" spacing={0.5} alignItems="center">
+              <Button variant="contained" onClick={() => onTryWrite(s.id)}>
+                Write to {s.name} [{s.label.name}]
+              </Button>
+              <IconButton size="small" aria-label={`remove sink ${s.name}`} onClick={() => onRemove(s.id)}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Stack>
           ))}
         </Stack>
       </CardContent>
