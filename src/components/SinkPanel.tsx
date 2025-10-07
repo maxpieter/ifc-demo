@@ -28,9 +28,9 @@ export default function SinkPanel({
   const [labelId, setLabelId] = useState('');
 
   return (
-    <Card variant="outlined">
-      <CardContent>
-        <Typography variant="h6">Sinks</Typography>
+    <Card variant="outlined" sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Typography variant="h6" padding={2}>Sinks</Typography>
         <Stack direction="row" spacing={1}>
           <TextField size="small" label="Sink name" value={name} onChange={e => setName(e.target.value)} />
           <TextField select size="small" label="Label" value={labelId} onChange={e => setLabelId(e.target.value)} sx={{ minWidth: 160 }}>
@@ -50,8 +50,8 @@ export default function SinkPanel({
           </Button>
         </Stack>
 
-        <Typography variant="subtitle2" sx={{ mt: 2 }}>Available sinks</Typography>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+        <Typography variant="subtitle2">Available sinks</Typography>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
           {sinks.map(s => (
             <Stack key={s.id} direction="row" spacing={0.5} alignItems="center">
               <Button variant="contained" onClick={() => onTryWrite(s.id)}>

@@ -71,10 +71,10 @@ export default function FlowVisualizer({ graph, onReset, onUndo, canUndo }: Flow
   );
 
   return (
-    <Card variant="outlined" sx={{ height: 520, width: '100%' }}>
-      <CardContent sx={{ height: 1, p: 0 }}>
+    <Card variant="outlined" sx={{ height: '100%', minHeight: 520, width: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ flexGrow: 1, p: 0, display: 'flex', flexDirection: 'column' }}>
         <Typography variant="h6" sx={{ p: 1 }}>Flow Visualizer</Typography>
-        <div style={{ height: 460, position: 'relative' }}>
+        <div style={{ flex: 1, minHeight: 460, position: 'relative', width: '100%' }}>
           <IconButton
             size="small"
             aria-label="reset flow layout"

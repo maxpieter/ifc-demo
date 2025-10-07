@@ -263,7 +263,7 @@ export default function App() {
         <Divider sx={{ my: 3 }} />
       </Grid>
 
-      <Grid container spacing={2} padding={1}>
+      <Grid container spacing={2} padding={1} sx={{ alignItems: 'stretch' }}>
         <Grid size={4}>
 
           <Box sx={{ width: '100%' }}>
@@ -297,7 +297,7 @@ export default function App() {
           <SourceFetcher lattice={lattice} onCreate={onCreateSource} />
         </Grid>
 
-        <Grid size={8}>
+        <Grid size={8} sx={{ display: 'flex' }}>
           <FlowComposer
               lattice={lattice}
               sources={sources.map(s => ({
@@ -307,7 +307,7 @@ export default function App() {
               />
         </Grid>
 
-        <Grid size={4}>
+        <Grid size={4} sx={{ display: 'flex' }}>
           <SinkPanel
             lattice={lattice}
             sinks={sinks}
@@ -316,15 +316,15 @@ export default function App() {
             onRemove={onRemoveSink}
           />
         </Grid>
-        
-        
 
-         <Grid size={8}>
+
+
+         <Grid size={8} sx={{ display: 'flex' }}>
           <FlowVisualizer graph={graph} onReset={clearFlow} onUndo={undo} canUndo={canUndo} />
         </Grid>
 
-        <Grid size={4}>
-          <ExplanationPanel lines={expl}/>
+        <Grid size={4} sx={{ display: 'flex' }}>
+          <ExplanationPanel lines={expl} />
         </Grid>
       </Grid>
     </Container>

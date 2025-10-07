@@ -61,10 +61,10 @@ export default function FlowComposer({
   };
 
   return (
-    <Card variant="outlined">
-      <CardContent>
+    <Card variant="outlined" sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Typography variant="h6">Flow Composer</Typography>
-        <Stack spacing={2}>
+        <Stack spacing={2} sx={{ flexGrow: 1 }}>
           <Box>
             <Typography variant="subtitle2">Transform Source</Typography>
             <Stack direction="row" spacing={1}>
