@@ -13,14 +13,23 @@ export interface LIO<A = unknown> { __ifc: true; label: IfcLabel; value: A }
 
 // --- Constructors ------------------------------------------------------------
 
-export const mkIfcLabel = (name: string): IfcLabel => {
+const withRuntimeMetadata = (label: IfcLabel, id: string, name: string): IfcLabel => {
+  if (label && typeof label === 'object') {
+    Object.assign(label as Record<string, unknown>, { ifc: true, id, name });
+    return label;
+  }
+  return { ifc: true, id, name };
+};
+
+export const mkIfcLabel = (name: string, id?: string): IfcLabel => {
+  const actualId = id ?? name.toLowerCase().replace(/\s+/g, '-');
   if ((IFC as any).label) {
     try {
-      return (IFC as any).label(name);
+      const lbl = (IFC as any).label(name);
+      return withRuntimeMetadata(lbl, actualId, name);
     } catch { /* fall through */ }
   }
-  const id = name.toLowerCase().replace(/\s+/g, '-');
-  return { ifc: true, id, name };
+  return { ifc: true, id: actualId, name };
 };
 
 export const pure = <A>(label: IfcLabel, value: A): LIO<A> => {
@@ -64,7 +73,10 @@ export const bind = <A, B>(
   if (aId && bId) {
     // runtime fallback join
     const j = rtJoin(lat, aId, bId);
-    if (j) outLabel = mkIfcLabel(lat.labels[j].name);
+    if (j) {
+      const rt = lat.labels[j];
+      if (rt) outLabel = mkIfcLabel(rt.name, rt.id);
+    }
   }
 
   const hasBind = (IFC as any).bind || (IFC as any).chain || (IFC as any).flatMap;
@@ -98,20 +110,39 @@ export const join = (
   b: IfcLabel,
   toRuntimeId: (lbl: IfcLabel) => string | undefined
 ): IfcLabel | undefined => {
+  const computeFallback = () => {
+    const aId = toRuntimeId(a);
+    const bId = toRuntimeId(b);
+    if (!aId || !bId) return undefined;
+    const j = rtJoin(lat, aId, bId);
+    if (!j) return undefined;
+    const rt = lat.labels[j];
+    return rt ? mkIfcLabel(rt.name, rt.id) : undefined;
+  };
+
+  const fallbackLabel = computeFallback();
+
   const hasJoin = (IFC as any).join || (IFC as any).lub;
   if (hasJoin) {
-    try { return (hasJoin as any)(a, b); } catch { /* fall back */ }
+    try {
+      const result = (hasJoin as any)(a, b);
+      if (fallbackLabel) return fallbackLabel;
+
+      const resId = toRuntimeId(result);
+      if (resId) {
+        const rt = lat.labels[resId];
+        if (rt) return mkIfcLabel(rt.name, rt.id);
+      }
+      return result;
+    } catch { /* fall through to fallback */ }
   }
-  const aId = toRuntimeId(a); const bId = toRuntimeId(b);
-  if (!aId || !bId) return undefined;
-  const j = rtJoin(lat, aId, bId);
-  return j ? mkIfcLabel(lat.labels[j].name) : undefined;
+
+  return fallbackLabel;
 };
 
 // Bridge between runtime labels and ifc labels (for UI → IFC interop)
 export const toIfcLabel = (rt: RuntimeLabel): IfcLabel => {
-  // always preserve id + name
-  return { ifc: true, id: rt.id, name: rt.name };
+  return mkIfcLabel(rt.name, rt.id);
 };
 export const fromIfcLabel = (lbl: IfcLabel): string | undefined => {
   if (!lbl) return undefined;

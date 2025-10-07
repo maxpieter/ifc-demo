@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
-  Box, Button, Card, CardContent, Divider, MenuItem, Stack, TextField, Typography
+  Box, Button, Card, CardContent, MenuItem, Stack, TextField, Typography
 } from '@mui/material';
 import { Lattice, join as rtJoin } from '../models/Lattice';
-import { map, bind, join, toIfcLabel, fromIfcLabel } from '../ifcClient';
+import { map, join, fromIfcLabel } from '../ifcClient';
 
 interface SourceSel { id: string; labelId: string; title: string; ifcLabel: any; value: string; lio: any; }
 
@@ -47,12 +47,15 @@ export default function FlowComposer({
 
     // Use ifc-ts join if available; else runtime
     const jIfc = join(lattice, a.ifcLabel, b.ifcLabel, fromIfcLabel);
+    console.log('join ifc-ts:', jIfc);
     const jName = jIfc ? (fromIfcLabel(jIfc) ?? 'unknown') : (rtJoin(lattice, a.labelId, b.labelId) ?? 'unknown');
+    console.log('join runtime:', jName);
     const value = `${a.value} + ${b.value}`;
+    console.log('combined value:', value);
 
     onNode({
       id: crypto.randomUUID(),
-      title: `combine (${a.title}, ${b.title})`,
+      title: `${a.value}, ${b.title}`,
       labelName: jName,
       value,
       kind: 'combine',
@@ -62,11 +65,11 @@ export default function FlowComposer({
 
   return (
     <Card variant="outlined" sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column'}}>
         <Typography variant="h6">Flow Composer</Typography>
         <Stack spacing={2} sx={{ flexGrow: 1 }}>
           <Box>
-            <Typography variant="subtitle2">Transform Source</Typography>
+            <Typography variant="subtitle2" padding={1}>Transform: Pick one source and apply a simple transformation</Typography>
             <Stack direction="row" spacing={1}>
               <TextField select size="small" label="Source" value={mapSrc} onChange={e => setMapSrc(e.target.value)} sx={{ minWidth: 220 }}>
                 {sources.map(s => <MenuItem key={s.id} value={s.id}>{s.title}</MenuItem>)}
@@ -77,7 +80,7 @@ export default function FlowComposer({
           </Box>
 
           <Box>
-            <Typography padding={1} variant="subtitle2">Combine Sources: computes the least upper bound (join) of the labels</Typography>
+            <Typography variant="subtitle2" padding={1}>Combine: Computes the least upper bound (join) of the labels</Typography>
             <Stack direction="row" spacing={1}>
               <TextField select size="small" label="Left source" value={left} onChange={e => setLeft(e.target.value)} sx={{ minWidth: 220 }}>
                 {sources.map(s => <MenuItem key={s.id} value={s.id}>{s.title}</MenuItem>)}

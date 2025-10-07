@@ -12,7 +12,7 @@ import SinkPanel from './components/SinkPanel';
 import ExplanationPanel from './components/ExplanationPanel';
 import { emptyGraph } from './models/FlowGraph';
 import type { FlowGraph } from './models/FlowGraph';
-import { fromIfcLabel, leq as ifcLeq, mkIfcLabel, toIfcLabel } from './ifcClient';
+import { fromIfcLabel, leq as ifcLeq, toIfcLabel } from './ifcClient';
 import LatticeGraph from './components/LatticeGraph';
 import CustomLatticeLoader from './components/CustomLatticeLoader';
 import Theory from './components/Theory';
