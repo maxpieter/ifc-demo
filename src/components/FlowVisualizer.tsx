@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import ReactFlow, { applyNodeChanges, Background, Controls, Edge, Node, NodeChange } from 'reactflow';
+import type { Node as ReactFlowNode } from 'reactflow';
 import { Card, CardContent, IconButton, Typography } from '@mui/material';
 import type { FlowGraph } from '../models/FlowGraph';
 import type { NodeKind } from '../models/FlowNode';
@@ -11,14 +12,16 @@ type FlowVisualizerProps = {
   onReset?: () => void;
   onUndo?: () => void;
   canUndo?: boolean;
+  selectedNodeId?: string;
+  onSelectNode?: (nodeId?: string) => void;
 };
 
-export default function FlowVisualizer({ graph, onReset, onUndo, canUndo }: FlowVisualizerProps) {
+export default function FlowVisualizer({ graph, onReset, onUndo, canUndo, selectedNodeId, onSelectNode }: FlowVisualizerProps) {
   const kindPalette: Record<NodeKind, { bg: string; border: string }> = {
-    source: { bg: '#e8f5e9', border: '#2e7d32' },
+    source: { bg: '#b3f7b8ff', border: '#2e7d32' },
     map: { bg: '#e3f2fd', border: '#1565c0' },
     combine: { bg: '#dee8ff', border: '#283593' },
-    sink: { bg: '#fff3e0', border: '#ed6c02' }
+    sink: { bg: '#ffecccff', border: '#ed6c02' }
   };
 
   const buildNodes = useCallback((): Node[] => (
@@ -27,19 +30,22 @@ export default function FlowVisualizer({ graph, onReset, onUndo, canUndo }: Flow
       const violation = Boolean(n.data.violation);
       const borderColor = violation ? '#f44336' : palette.border;
       const backgroundColor = violation ? '#ffebee' : palette.bg;
+      const isSelected = n.id === selectedNodeId;
       return {
         id: n.id,
         position: n.position,
-        data: { label: `${n.data.value, n.data.title}\n[label=${n.data.label.name}]${violation ? ' ⚠' : ''}` },
+        data: { label: `${n.data.title}\n[label=${n.data.label.name}]${violation ? ' ⚠' : ''}` },
         style: {
-          border: `2px solid ${borderColor}`,
+          border: `2px solid ${isSelected ? '#673ab7' : borderColor}`,
+          boxShadow: isSelected ? '0 0 0 3px rgba(103,58,183,0.3)' : 'none',
           background: backgroundColor,
           whiteSpace: 'pre-line',
-          padding: 6
+          padding: 6,
+          cursor: 'pointer'
         }
       };
     })
-  ), [graph]);
+  ), [graph, selectedNodeId]);
 
   const buildEdges = useCallback((): Edge[] => (
     graph.edges.map(e => ({
@@ -79,6 +85,14 @@ export default function FlowVisualizer({ graph, onReset, onUndo, canUndo }: Flow
   const handleUndo = useCallback(() => {
     onUndo?.();
   }, [onUndo]);
+
+  const handleNodeClick = useCallback((_: React.MouseEvent, node: ReactFlowNode) => {
+    onSelectNode?.(node.id);
+  }, [onSelectNode]);
+
+  const handlePaneClick = useCallback(() => {
+    onSelectNode?.(undefined);
+  }, [onSelectNode]);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => setNodes(nds => applyNodeChanges(changes, nds)),
@@ -123,7 +137,15 @@ export default function FlowVisualizer({ graph, onReset, onUndo, canUndo }: Flow
           >
             <UndoIcon fontSize="small" />
           </IconButton>
-          <ReactFlow nodes={nodes} edges={edges} fitView nodesDraggable onNodesChange={onNodesChange}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            fitView
+            nodesDraggable
+            onNodesChange={onNodesChange}
+            onNodeClick={handleNodeClick}
+            onPaneClick={handlePaneClick}
+          >
             <Background />
             <Controls />
           </ReactFlow>

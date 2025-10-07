@@ -15,13 +15,17 @@ export default function SinkPanel({
   sinks,
   onCreate,
   onTryWrite,
-  onRemove
+  onRemove,
+  selectedNodeLabel,
+  canWrite
 }: {
   lattice: Lattice;
   sinks: SinkDef[];
   onCreate: (s: SinkDef) => void;
   onTryWrite: (sinkId: string) => void;
   onRemove: (sinkId: string) => void;
+  selectedNodeLabel?: string;
+  canWrite: boolean;
 }) {
   const labels = useMemo(() => Object.values(lattice.labels), [lattice]);
   const [name, setName] = useState('Console');
@@ -51,10 +55,13 @@ export default function SinkPanel({
         </Stack>
 
         <Typography variant="subtitle2">Available sinks</Typography>
+        <Typography variant="caption" color={canWrite ? 'text.secondary' : 'warning.main'}>
+          {selectedNodeLabel ? `Writing from: ${selectedNodeLabel}` : 'Select a node in the flow to enable writes.'}
+        </Typography>
         <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
           {sinks.map(s => (
             <Stack key={s.id} direction="row" spacing={0.5} alignItems="center">
-              <Button variant="contained" onClick={() => onTryWrite(s.id)}>
+              <Button variant="contained" onClick={() => onTryWrite(s.id)} disabled={!canWrite}>
                 Write to {s.name} [{s.label.name}]
               </Button>
               <IconButton size="small" aria-label={`remove sink ${s.name}`} onClick={() => onRemove(s.id)}>

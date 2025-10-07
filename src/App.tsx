@@ -34,6 +34,7 @@ type Snapshot = {
   sinks: Sink[];
   graph: FlowGraph;
   expl: string[];
+  selectedNodeId?: string;
 };
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
   const [sinks, setSinksState] = useState<Sink[]>([]);
   const [graph, setGraphState] = useState<FlowGraph>(emptyGraph());
   const [expl, setExplState] = useState<string[]>([]);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(undefined);
   const [history, setHistory] = useState<Snapshot[]>([]);
 
   const runAction = useCallback((action: () => void) => {
@@ -50,10 +52,11 @@ export default function App() {
       sources,
       sinks,
       graph,
-      expl
+      expl,
+      selectedNodeId
     }]);
     action();
-  }, [lattice, sources, sinks, graph, expl]);
+  }, [lattice, sources, sinks, graph, expl, selectedNodeId]);
 
   const pushExplanation = useCallback((s: string) => {
     setExplState(prev => [s, ...prev].slice(0, 50));
@@ -68,6 +71,7 @@ export default function App() {
       setSinksState(snapshot.sinks);
       setGraphState(snapshot.graph);
       setExplState(snapshot.expl);
+      setSelectedNodeId(snapshot.selectedNodeId);
       return prev.slice(0, -1);
     });
   }, []);
@@ -111,7 +115,7 @@ export default function App() {
   // add a source
   const onCreateSource = (s: { id: string; value: string; rtLabel: RuntimeLabel; ifcLabel: any; lio: any; }) => {
     runAction(() => {
-      const title = `source(${s.rtLabel.name})`;
+      const title = `${s.value}`;
       const nodeId = s.id;
       setSourcesState(prev => [...prev, { id: nodeId, title, value: s.value, rtLabel: s.rtLabel, ifcLabel: s.ifcLabel, lio: s.lio }]);
       setGraphState(prev => ({
@@ -123,6 +127,7 @@ export default function App() {
         }],
         edges: [...prev.edges]
       }));
+      setSelectedNodeId(nodeId);
       pushExplanation(`Created source with value="${s.value}" and label ${s.rtLabel.name}.`);
     });
   };
@@ -146,6 +151,7 @@ export default function App() {
         }],
         edges: [...prev.edges, ...node.parents.map((p, i) => ({ id: `${node.id}-${i}`, from: p, to: node.id, label: node.kind }))]
       }));
+      setSelectedNodeId(node.id);
       pushExplanation(`${node.kind === 'map' ? 'Mapped' : 'Combined'} → new node label approximated as ${rt.name}.`);
     });
   };
@@ -168,6 +174,7 @@ export default function App() {
         const edges = prev.edges.filter(e => e.from !== targetId && e.to !== targetId);
         return { nodes, edges };
       });
+      setSelectedNodeId(prev => (prev === `sink-${sinkId}` ? undefined : prev));
       pushExplanation(`Removed sink "${sink.name}".`);
     });
   };
@@ -177,8 +184,21 @@ export default function App() {
     const sink = sinks.find(s => s.id === sinkId);
     if (!sink) return;
     // pick the last node as "current output" for demo; a real app would let user select
-    const current = graph.nodes.at(-1);
-    if (!current) return;
+    if (!selectedNodeId) {
+      pushExplanation('Cannot write: select a node to write from first.');
+      return;
+    }
+
+    const current = graph.nodes.find(n => n.id === selectedNodeId);
+    if (!current) {
+      pushExplanation('Selected node no longer exists.');
+      setSelectedNodeId(undefined);
+      return;
+    }
+    if (current.kind === 'sink') {
+      pushExplanation('Cannot write from a sink node. Select a source/map/combine node.');
+      return;
+    }
 
     const vLblIfc = toIfcLabel(current.data.label);
     const sLblIfc = toIfcLabel(sink.label);
@@ -191,7 +211,7 @@ export default function App() {
           id: `sink-${sink.id}`,
           kind: 'sink' as const,
           position: { x: current.position.x + 240, y: current.position.y },
-          data: { title: `${sink.name}`, label: sink.label, violation: !ok }
+          data: { title: `sink(${sink.name})`, label: sink.label, violation: !ok }
         };
         const nodes = prev.nodes.some(n => n.id === sinkNode.id) ? prev.nodes : [...prev.nodes, sinkNode];
         const edges = [...prev.edges, e];
@@ -219,14 +239,22 @@ export default function App() {
       setSinksState([]);
       setGraphState(emptyGraph());
       setExplState([]);
+      setSelectedNodeId(undefined);
     });
   }, [runAction]);
 
   const clearFlow = useCallback(() => {
     runAction(() => {
       setGraphState(emptyGraph());
+      setSelectedNodeId(undefined);
     });
   }, [runAction]);
+
+  const handleSelectNode = useCallback((nodeId?: string) => {
+    setSelectedNodeId(nodeId);
+  }, []);
+
+  const selectedNode = selectedNodeId ? graph.nodes.find(n => n.id === selectedNodeId) : undefined;
 
   return (
     <Container sx={{ py: 3 }}>
@@ -291,12 +319,21 @@ export default function App() {
             onCreate={onCreateSink}
             onTryWrite={onTryWrite}
             onRemove={onRemoveSink}
+            selectedNodeLabel={selectedNode?.data.title}
+            canWrite={Boolean(selectedNode && selectedNode.kind !== 'sink')}
           />
         </Grid>
 
 
         <Grid size={8} sx={{ display: 'flex' }}>
-          <FlowVisualizer graph={graph} onReset={clearFlow} onUndo={undo} canUndo={canUndo} />
+          <FlowVisualizer
+            graph={graph}
+            onReset={clearFlow}
+            onUndo={undo}
+            canUndo={canUndo}
+            selectedNodeId={selectedNodeId}
+            onSelectNode={handleSelectNode}
+          />
         </Grid>
 
         <Grid size={4} sx={{ display: 'flex' }}>
