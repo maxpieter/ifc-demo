@@ -21,10 +21,10 @@ export default function FlowComposer({
     parents: string[];
   }) => void;
 }) {
-  const [left, setLeft] = useState<string>('');       // source id
-  const [right, setRight] = useState<string>('');     // source id
-  const [mapSrc, setMapSrc] = useState<string>('');   // source id
-  const [mapSuffix, setMapSuffix] = useState('!');
+  const [left, setLeft] = useState<string>('');    
+  const [right, setRight] = useState<string>('');  
+  const [mapSrc, setMapSrc] = useState<string>('');
+  const [mapSuffix, setMapSuffix] = useState('+ new information');
 
   const mapAction = () => {
     const s = sources.find(x => x.id === mapSrc);
@@ -66,8 +66,8 @@ export default function FlowComposer({
         <Typography variant="h6">Flow Composer</Typography>
         <Stack spacing={2}>
           <Box>
-            <Typography variant="subtitle2">map</Typography>
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="subtitle2">Transform Source</Typography>
+            <Stack direction="row" spacing={1}>
               <TextField select size="small" label="Source" value={mapSrc} onChange={e => setMapSrc(e.target.value)} sx={{ minWidth: 220 }}>
                 {sources.map(s => <MenuItem key={s.id} value={s.id}>{s.title}</MenuItem>)}
               </TextField>
@@ -76,10 +76,8 @@ export default function FlowComposer({
             </Stack>
           </Box>
 
-          <Divider />
-
           <Box>
-            <Typography variant="subtitle2">combine (join labels)</Typography>
+            <Typography padding={1} variant="subtitle2">Combine Sources: computes the least upper bound (join) of the labels</Typography>
             <Stack direction="row" spacing={1}>
               <TextField select size="small" label="Left source" value={left} onChange={e => setLeft(e.target.value)} sx={{ minWidth: 220 }}>
                 {sources.map(s => <MenuItem key={s.id} value={s.id}>{s.title}</MenuItem>)}
@@ -87,7 +85,7 @@ export default function FlowComposer({
               <TextField select size="small" label="Right source" value={right} onChange={e => setRight(e.target.value)} sx={{ minWidth: 220 }}>
                 {sources.map(s => <MenuItem key={s.id} value={s.id}>{s.title}</MenuItem>)}
               </TextField>
-              <Button variant="contained" onClick={combineAction} disabled={!left || !right}>Add combine node</Button>
+              <Button variant="outlined" onClick={combineAction} disabled={!left || !right}>Add combine node</Button>
             </Stack>
           </Box>
         </Stack>

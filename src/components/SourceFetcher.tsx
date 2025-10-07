@@ -16,7 +16,7 @@ export default function SourceFetcher({
   lattice, onCreate
 }: { lattice: Lattice; onCreate: (s: SourceCard) => void; }) {
   const labels = useMemo(() => Object.values(lattice.labels), [lattice]);
-  const [value, setValue] = useState('Dummy data');
+  const [value, setValue] = useState('dummy data');
   const [labelId, setLabelId] = useState<string>('');
 
   const create = () => {
@@ -30,9 +30,9 @@ export default function SourceFetcher({
   return (
     <Card variant="outlined">
       <CardContent>
-        <Typography variant="h6">Source Fetcher (stub)</Typography>
+        <Typography variant="h6">Create a source</Typography>
         <Typography variant="body2" sx={{ mb: 1 }}>
-          Creates a labeled source using <code>LIO</code> (stubbed): <code>pure("Dummy data")</code> with chosen label.
+          Creates a labeled source using <code>LIO</code>.
         </Typography>
         <Stack direction="row" spacing={1}>
           <TextField label="Value" size="small" fullWidth value={value} onChange={e => setValue(e.target.value)} />

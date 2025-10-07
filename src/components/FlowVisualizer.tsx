@@ -41,7 +41,14 @@ export default function FlowVisualizer({ graph, onReset, onUndo, canUndo }: Flow
   const [edges, setEdges] = useState<Edge[]>(() => buildEdges());
 
   useEffect(() => {
-    setNodes(buildNodes());
+    setNodes(prev => {
+      const previousPositions = new Map(prev.map(n => [n.id, n.position]));
+      const next = buildNodes();
+      return next.map(node => {
+        const pos = previousPositions.get(node.id);
+        return pos ? { ...node, position: pos } : node;
+      });
+    });
   }, [buildNodes]);
 
   useEffect(() => {
