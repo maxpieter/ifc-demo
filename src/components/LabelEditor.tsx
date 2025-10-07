@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
-  Button, Card, CardContent, Divider, Grid2 as Grid,
-  List, ListItem, ListItemText, MenuItem, Select, Stack, TextField, Typography
+  Card, CardContent, Divider, Grid2 as Grid,
+  List, ListItem, ListItemText, Stack, Typography
 } from '@mui/material';
-import { addLabel, addLeq, emptyLattice, Lattice } from '../models/Lattice';
+import { Lattice } from '../models/Lattice';
 
 export interface LabelEditorProps {
   lattice: Lattice;
@@ -35,7 +35,7 @@ export default function LabelEditor({ lattice, onChange }: LabelEditorProps) {
         <Grid size={6}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="subtitle1">Edges (≤)</Typography>
+              <Typography variant="subtitle1">Relations (≤)</Typography>
               <Divider sx={{ my: 1 }} />
               <List dense>
                 {lattice.edges.map((e, i) => (

@@ -15,6 +15,7 @@ import type { FlowGraph } from './models/FlowGraph';
 import { fromIfcLabel, leq as ifcLeq, mkIfcLabel, toIfcLabel } from './ifcClient';
 import LatticeGraph from './components/LatticeGraph';
 import CustomLatticeLoader from './components/CustomLatticeLoader';
+import Theory from './components/Theory';
 
 type Src = {
   id: string;
@@ -239,29 +240,9 @@ export default function App() {
         Explore label-based IFC: define a lattice, create Labeled IO, compose flows, and try writes to sinks.
       </Typography>
       <Grid container padding={1}>
-        <Paper variant='outlined'>
-          <Typography variant="subtitle2" gutterBottom>
-            Enforcement Rules
-          </Typography>
-
-          <Stack spacing={0.5}>
-            <Typography variant="body2">
-              <Chip size="small" label="Label propagation" sx={{ mr: 1 }} />
-              Combine sources → join label (<code>ifc-ts</code> or runtime lattice)
-            </Typography>
-            <Typography variant="body2">
-              <Chip size="small" label="Sinks" sx={{ mr: 1 }} />
-              Write allowed if <code>leq(ℓv, ℓs)</code>
-            </Typography>
-            <Typography variant="body2">
-              <Chip size="small" label="Violations" sx={{ mr: 1 }} />
-              Failed <code>leq</code> → red + explanation
-            </Typography>
-          </Stack>
-
-        </Paper>
-        <Divider sx={{ my: 3 }} />
+        <Theory />
       </Grid>
+        <Divider sx={{ my: 3 }} />
 
       <Grid container spacing={2} padding={1} sx={{ alignItems: 'stretch' }}>
         <Grid size={4}>
@@ -287,7 +268,7 @@ export default function App() {
         </Grid>
 
         <Grid size={8}>
-          <LatticeGraph lattice={lattice} onReset={emptyLattice} onUndo={undo} canUndo={canUndo} />
+          <LatticeGraph lattice={lattice} onReset={clearLattice} onUndo={undo} canUndo={canUndo} />
         </Grid>
 
         <Grid size={8}>

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import ReactFlow, { Background, Controls, Node, Edge, applyNodeChanges, NodeChange } from 'reactflow';
 import { Card, CardContent, IconButton, Typography } from '@mui/material';
 import type { Lattice } from '../models/Lattice';
