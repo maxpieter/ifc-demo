@@ -5,12 +5,12 @@ import {
 } from '@mui/material';
 import { Lattice } from '../models/Lattice';
 
-export interface LabelEditorProps {
+export interface LatticeInformationProps {
   lattice: Lattice;
   onChange: (lat: Lattice) => void;
 }
 
-export default function LabelEditor({ lattice, onChange }: LabelEditorProps) {
+export default function LatticeInformation({ lattice, onChange }: LatticeInformationProps) {
   const labelsArr = useMemo(() => Object.values(lattice.labels), [lattice]);
 
   return (

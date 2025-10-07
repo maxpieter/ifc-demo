@@ -4,7 +4,6 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import { theme } from './theme';
 import App from './App';
 import 'reactflow/dist/style.css';
-import './styles/reactflow.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

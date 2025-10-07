@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import ReactFlow, { applyNodeChanges, Background, Controls, Edge, Node, NodeChange } from 'reactflow';
 import { Card, CardContent, IconButton, Typography } from '@mui/material';
 import type { FlowGraph } from '../models/FlowGraph';
+import type { NodeKind } from '../models/FlowNode';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import UndoIcon from '@mui/icons-material/Undo';
 
@@ -13,17 +14,31 @@ type FlowVisualizerProps = {
 };
 
 export default function FlowVisualizer({ graph, onReset, onUndo, canUndo }: FlowVisualizerProps) {
+  const kindPalette: Record<NodeKind, { bg: string; border: string }> = {
+    source: { bg: '#e8f5e9', border: '#2e7d32' },
+    map: { bg: '#e3f2fd', border: '#1565c0' },
+    combine: { bg: '#dee8ff', border: '#283593' },
+    sink: { bg: '#fff3e0', border: '#ed6c02' }
+  };
+
   const buildNodes = useCallback((): Node[] => (
-    graph.nodes.map(n => ({
-      id: n.id,
-      position: n.position,
-      data: { label: `${n.data.title}\n[label=${n.data.label.name}]${n.data.violation ? ' ⚠' : ''}` },
-      style: {
-        border: `2px solid ${n.data.violation ? '#f44336' : '#90caf9'}`,
-        whiteSpace: 'pre-line',
-        padding: 6
-      }
-    }))
+    graph.nodes.map(n => {
+      const palette = kindPalette[n.kind] ?? { bg: '#f5f5f5', border: '#90caf9' };
+      const violation = Boolean(n.data.violation);
+      const borderColor = violation ? '#f44336' : palette.border;
+      const backgroundColor = violation ? '#ffebee' : palette.bg;
+      return {
+        id: n.id,
+        position: n.position,
+        data: { label: `${n.data.title}\n[label=${n.data.label.name}]${violation ? ' ⚠' : ''}` },
+        style: {
+          border: `2px solid ${borderColor}`,
+          background: backgroundColor,
+          whiteSpace: 'pre-line',
+          padding: 6
+        }
+      };
+    })
   ), [graph]);
 
   const buildEdges = useCallback((): Edge[] => (

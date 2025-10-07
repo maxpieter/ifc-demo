@@ -3,7 +3,7 @@ import { Box, Chip, Container, Divider, Grid2 as Grid, List, ListItem, ListItemT
 import { emptyLattice } from './models/Lattice';
 import type { Lattice } from './models/Lattice';
 import { RuntimeLabel } from './models/Label';
-import LabelEditor from './components/LabelEditor';
+import LatticeInformation from './components/LatticeInformation';
 import SourceFetcher from './components/SourceFetcher';
 import FlowComposer from './components/FlowComposer';
 import FlowVisualizer from './components/FlowVisualizer';
@@ -267,7 +267,7 @@ export default function App() {
         </Grid>
 
         <Grid size={8}>
-          <LabelEditor lattice={lattice} onChange={handleLatticeChange} />
+          <LatticeInformation lattice={lattice} onChange={handleLatticeChange} />
         </Grid>
 
         <Grid size={12}>
