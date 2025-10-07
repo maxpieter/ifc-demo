@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, CardContent, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { Lattice } from '../models/Lattice';
 import { RuntimeLabel } from '../models/Label';
@@ -12,12 +12,21 @@ export interface SourceCard {
   lio: { __ifc: true; label: any; value: string };
 }
 
+const defaultValue = 'Foo';
+
 export default function SourceFetcher({
-  lattice, onCreate
-}: { lattice: Lattice; onCreate: (s: SourceCard) => void; }) {
+  lattice,
+  onCreate,
+  resetToken
+}: { lattice: Lattice; onCreate: (s: SourceCard) => void; resetToken: number; }) {
   const labels = useMemo(() => Object.values(lattice.labels), [lattice]);
-  const [value, setValue] = useState('Foo');
+  const [value, setValue] = useState(defaultValue);
   const [labelId, setLabelId] = useState<string>('');
+
+  useEffect(() => {
+    setValue(defaultValue);
+    setLabelId('');
+  }, [resetToken]);
 
   const create = () => {
     const rtLabel = labels.find(l => l.id === labelId);
@@ -25,6 +34,8 @@ export default function SourceFetcher({
     const ifcLabel = toIfcLabel(rtLabel);
     const lio = pure(ifcLabel, value); // actively uses ifc-ts wrapper
     onCreate({ id: crypto.randomUUID(), value, rtLabel, ifcLabel, lio });
+    setValue(defaultValue);
+    setLabelId('');
   };
 
   return (

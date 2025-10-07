@@ -45,6 +45,7 @@ export default function App() {
   const [expl, setExplState] = useState<string[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(undefined);
   const [history, setHistory] = useState<Snapshot[]>([]);
+  const [resetToken, setResetToken] = useState(0);
 
   const runAction = useCallback((action: () => void) => {
     setHistory(prev => [...prev, {
@@ -232,7 +233,7 @@ export default function App() {
     });
   }, [runAction]);
 
-  const clearLattice = useCallback(() => {
+  const clear = useCallback(() => {
     runAction(() => {
       setLatticeState(emptyLattice());
       setSourcesState([]);
@@ -240,13 +241,7 @@ export default function App() {
       setGraphState(emptyGraph());
       setExplState([]);
       setSelectedNodeId(undefined);
-    });
-  }, [runAction]);
-
-  const clearFlow = useCallback(() => {
-    runAction(() => {
-      setGraphState(emptyGraph());
-      setSelectedNodeId(undefined);
+      setResetToken(t => t + 1);
     });
   }, [runAction]);
 
@@ -291,7 +286,7 @@ export default function App() {
         </Grid>
 
         <Grid size={8}>
-          <LatticeGraph lattice={lattice} onReset={clearLattice} onUndo={undo} canUndo={canUndo} />
+          <LatticeGraph lattice={lattice} onReset={clear} onUndo={undo} canUndo={canUndo} />
         </Grid>
 
         <Grid size={8}>
@@ -299,7 +294,7 @@ export default function App() {
         </Grid>
 
         <Grid size={12}>
-          <SourceFetcher lattice={lattice} onCreate={onCreateSource} />
+          <SourceFetcher lattice={lattice} onCreate={onCreateSource} resetToken={resetToken} />
         </Grid>
 
         <Grid size={8} sx={{ display: 'flex' }}>
@@ -328,7 +323,7 @@ export default function App() {
         <Grid size={8} sx={{ display: 'flex' }}>
           <FlowVisualizer
             graph={graph}
-            onReset={clearFlow}
+            onReset={clear}
             onUndo={undo}
             canUndo={canUndo}
             selectedNodeId={selectedNodeId}
