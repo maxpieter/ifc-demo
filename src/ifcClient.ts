@@ -122,6 +122,16 @@ export const join = (
 
   const fallbackLabel = computeFallback();
 
+// IFC builds the lattice at compile time. LUB<"Alice","Bob"> is a type alias for "Alice" | "Bob"; 
+// the compiler treats that union as “Alice ≤ Alice|Bob” and “Bob ≤ Alice|Bob”. That’s perfect when 
+// you know every principal and relationship while writing code, because TypeScript can enforce the lattice statically.
+
+// Our demo, though, lets users add labels and edges on the fly. There’s no way to feed those 
+// runtime edits back into TypeScript’s type system—it’s already compiled. The runtime ifc-ts 
+// helpers (e.g. lub) just return the left operand and don’t maintain any dynamic graph, so they 
+// can’t “learn” about new edges. That’s why we still rely on the runtime Lattice model and compute 
+// joins ourselves: the type-level approach can’t adapt after compilation.
+
   const hasJoin = (IFC as any).join || (IFC as any).lub;
   if (hasJoin) {
     try {
