@@ -30,4 +30,4 @@ This demo lets you:
 ### Credits
 
 This project builds on and demonstrates concepts from [ifc-ts]([https://www.genome.gov/](https://github.com/willardthor/ifc-ts)),
-a TypeScript library for information flow control. We are grateful for ifc-ts’s theoretical foundation and runtime enforcement mechanisms, which made this demo possible.
+a TypeScript library for information flow control.
