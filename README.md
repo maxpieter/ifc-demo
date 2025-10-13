@@ -33,3 +33,11 @@ This interactive demo for exploring **Information Flow Control (IFC)** using sec
 
 This project builds on and demonstrates concepts from [ifc-ts](https://github.com/willardthor/ifc-ts),
 a TypeScript library for information flow control.
+
+### Runtime vs Compile-Time
+
+The original `ifc-ts` package focuses on *compile-time* enforcement: TypeScript’s type system ensures
+your lattice, principals, and flows are sound during development. This demo flips the perspective to a
+*runtime* sandbox where you can create labels, edges, and flows on the fly. That means the interactive
+UI maintains its own lattice state, materialises joins/meets dynamically, and surfaces violations in
+real time—even when the relationships you explore never existed in the original TypeScript source.

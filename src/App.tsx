@@ -257,10 +257,12 @@ export default function App() {
       <Typography variant="body1" sx={{ mb: 2 }}>
         Explore label-based IFC: define a lattice, create Labeled IO, compose flows, and try writes to sinks.
       </Typography>
+      
       <Grid container padding={1}>
         <Theory />
       </Grid>
-        <Divider sx={{ my: 3 }} />
+
+      <Divider sx={{ my: 3 }} />
 
       <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
         <Grid size={4}>
@@ -321,6 +323,7 @@ export default function App() {
         
 
       </Grid>
+
         <Grid container spacing={2} paddingTop={2} sx={{ alignItems: 'stretch', height: 520 }}>
           <Grid size={8} sx={{ display: 'flex', height: '100%' }}>
             <FlowVisualizer
@@ -336,6 +339,7 @@ export default function App() {
           <Grid size={4} sx={{ display: 'flex', height: '100%' }}>
             <ExplanationPanel lines={expl} />
           </Grid>
+
         </Grid>
     </Container>
   );

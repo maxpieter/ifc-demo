@@ -5,7 +5,7 @@ import { join as rtJoin, leq as rtLeq } from './models/Lattice';
 
 // Import everything from ifc-ts (names may vary by version)
 // Quickstart shows `label` + `type Label` exist. We defensively probe.
-import * as IFC from 'ifc-ts'; // actively used
+import * as IFC from 'ifc-ts';
 
 // Nominal types used throughout UI
 export type IfcLabel = any; // from IFC, but dynamic in UI
