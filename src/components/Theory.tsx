@@ -9,8 +9,7 @@ export default function Theory() {
         lower bound (<strong>glb</strong>). The lattice organises security levels and describes how
         information may or may not flow between them (e.g., <em>Low ≤ High</em>). A{' '}
         <strong>level</strong> refers to a specific security classification or label in the lattice.
-        Levels are the elements (nodes) of the lattice, ordered according to the confidentiality or
-        sensitivity hierarchy.
+        Levels are the elements (nodes) of the lattice, ordered according to the confidentiality hierarchy.
       </Typography>
 
       <Typography variant="body1" sx={{ mb: 2 }}>

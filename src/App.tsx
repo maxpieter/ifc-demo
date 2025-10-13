@@ -49,6 +49,11 @@ type Snapshot = {
   expl: string[];
   selectedNodeId?: string;
 };
+function getSystemMode(): 'light' | 'dark' {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
 
 export default function App() {
   const [lattice, setLatticeState] = useState(emptyLattice());
@@ -61,10 +66,6 @@ export default function App() {
   const [resetToken, setResetToken] = useState(0);
   const [mode, setMode] = useState<'light' | 'dark'>(() => getSystemMode());
 
-  const getSystemMode = () =>
-    typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
 
   const baseThemeOptions = {
     cssVariables: true,
