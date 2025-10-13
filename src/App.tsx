@@ -330,7 +330,7 @@ export default function App() {
       
       </Grid>
 
-        <Grid container spacing={2} paddingTop={2} sx={{ alignItems: 'stretch', height: 520 }}>
+        <Grid container spacing={2} paddingTop={2} sx={{ alignItems: 'stretch', height: 550 }}>
           <Grid size={8} sx={{ display: 'flex', height: '100%' }}>
             <FlowVisualizer
               graph={graph}
