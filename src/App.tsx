@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { Box, Container, Divider, Grid2 as Grid, Tab, Tabs, Typography } from '@mui/material';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Box, Container, CssBaseline, Divider, Grid2 as Grid, Stack, Tab, Tabs, ThemeProvider, Typography } from '@mui/material';
 import { emptyLattice } from './models/Lattice';
 import type { Lattice } from './models/Lattice';
 import { RuntimeLabel } from './models/Label';
@@ -16,6 +16,8 @@ import { fromIfcLabel, leq as ifcLeq, toIfcLabel } from './ifcClient';
 import LatticeGraph from './components/LatticeGraph';
 import CustomLatticeLoader from './components/CustomLatticeLoader';
 import Theory from './components/Theory';
+import createTheme from './theme';
+import MUISwitch from './components/MUISwitch';
 
 type Src = {
   id: string;
@@ -46,6 +48,32 @@ export default function App() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(undefined);
   const [history, setHistory] = useState<Snapshot[]>([]);
   const [resetToken, setResetToken] = useState(0);
+  const [mode, setMode] = useState<'light' | 'dark'>(() => getSystemMode());
+
+  const getSystemMode = () =>
+    typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+
+  const baseThemeOptions = {
+    cssVariables: true,
+    typography: {
+      fontFamily: ['Inter', 'system-ui', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'].join(','),
+    },
+  };
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        ...baseThemeOptions,
+        colorSchemes: {
+          light: true,
+          dark: mode === 'dark',
+        },
+      }),
+    [mode]
+  );
+
 
   const runAction = useCallback((action: () => void) => {
     setHistory(prev => [...prev, {
@@ -252,101 +280,112 @@ export default function App() {
   const selectedNode = selectedNodeId ? graph.nodes.find(n => n.id === selectedNodeId) : undefined;
 
   return (
-    <Container sx={{ py: 3 }}>
-      <Typography variant="h4" gutterBottom>ifc-ts Interactive Demo</Typography>
-      <Typography variant="body1" sx={{ mb: 2 }}>
-        Explore label-based IFC: define a lattice, create Labeled IO, compose flows, and try writes to sinks.
-      </Typography>
-      
-      <Grid container padding={1}>
-        <Theory />
-      </Grid>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container sx={{ py: 5 }}>
+        <Stack direction='row' justifyContent='space-between'>
+          <Typography variant="h4" gutterBottom>ifc-ts Interactive Demo</Typography>
+          <MUISwitch
+            checked={mode === 'dark'}
+            onChange={() => setMode(prev => (prev === 'light' ? 'dark' : 'light'))}
+            name="theme">
+          </MUISwitch>
+        </Stack>
+
+        <Typography variant="body1" sx={{ mb: 2}}>
+            Explore label-based IFC: define a lattice, create Labeled IO, compose flows, and try writes to sinks.
+        </Typography>
         
-      <Divider sx={{ my: 5 }} >Lattice Construction</Divider>
+        <Grid container padding={1}>
+          <Theory />
+        </Grid>
+          
+        <Divider sx={{ my: 5 }} >Lattice Construction</Divider>
 
-      <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
+        <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
+          
+          <Grid size={4}>
+            {/* Tabs header */}
+            <Tabs
+              value={value}
+              onChange={handleChange}
+              aria-label="lattice editor tabs"
+              centered
+            >
+              <Tab label="Preset Lattice" {...a11yProps(0)} />
+              <Tab label="Custom Lattice" {...a11yProps(1)} />
+            </Tabs>
+
+            {/* Tab content */}
+            <CustomTabPanel value={value} index={0}>
+              <PresetLatticeLoader onLoad={handleLatticeChange} />
+            </CustomTabPanel>
+
+            <CustomTabPanel value={value} index={1}>
+              <CustomLatticeLoader lattice={lattice} onChange={handleLatticeChange} />
+            </CustomTabPanel>
+          </Grid>
+
+          <Grid size={5.5}>
+            <LatticeGraph lattice={lattice} onReset={clear} onUndo={undo} canUndo={canUndo} />
+          </Grid>
+
+          <Grid size={2.5}>
+            <LatticeInformation lattice={lattice} onChange={handleLatticeChange} />
+          </Grid>
         
-        <Grid size={4}>
-          {/* Tabs header */}
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            aria-label="lattice editor tabs"
-            centered
-          >
-            <Tab label="Preset Lattice" {...a11yProps(0)} />
-            <Tab label="Custom Lattice" {...a11yProps(1)} />
-          </Tabs>
-
-          {/* Tab content */}
-          <CustomTabPanel value={value} index={0}>
-            <PresetLatticeLoader onLoad={handleLatticeChange} />
-          </CustomTabPanel>
-
-          <CustomTabPanel value={value} index={1}>
-            <CustomLatticeLoader lattice={lattice} onChange={handleLatticeChange} />
-          </CustomTabPanel>
         </Grid>
 
-        <Grid size={5.5}>
-          <LatticeGraph lattice={lattice} onReset={clear} onUndo={undo} canUndo={canUndo} />
-        </Grid>
+          <Divider sx={{ my: 5 }}>Information Flow</Divider>
+        
+        <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
 
-        <Grid size={2.5}>
-          <LatticeInformation lattice={lattice} onChange={handleLatticeChange} />
-        </Grid>
-      
-      </Grid>
+          <Grid size={12}>
+            <SourceFetcher lattice={lattice} onCreate={onCreateSource} resetToken={resetToken} />
+          </Grid>
 
-        <Divider sx={{ my: 5 }}>Information Flow</Divider>
-      
-      <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
+          <Grid size={8} sx={{ display: 'flex' }}>
+            <FlowComposer
+                lattice={lattice}
+                sources={sources.map(s => ({
+                  id: s.id, title: s.title, labelId: s.rtLabel.id, ifcLabel: s.ifcLabel, value: s.value, lio: s.lio
+                }))}
+                onNode={onCompose}
+                />
+          </Grid>
 
-        <Grid size={12}>
-          <SourceFetcher lattice={lattice} onCreate={onCreateSource} resetToken={resetToken} />
-        </Grid>
-
-        <Grid size={8} sx={{ display: 'flex' }}>
-          <FlowComposer
+          <Grid size={4} sx={{ display: 'flex' }}>
+            <SinkPanel
               lattice={lattice}
-              sources={sources.map(s => ({
-                id: s.id, title: s.title, labelId: s.rtLabel.id, ifcLabel: s.ifcLabel, value: s.value, lio: s.lio
-              }))}
-              onNode={onCompose}
-              />
-        </Grid>
-
-        <Grid size={4} sx={{ display: 'flex' }}>
-          <SinkPanel
-            lattice={lattice}
-            sinks={sinks}
-            onCreate={onCreateSink}
-            onTryWrite={onTryWrite}
-            onRemove={onRemoveSink}
-            selectedNodeLabel={selectedNode?.data.title}
-            canWrite={Boolean(selectedNode && selectedNode.kind !== 'sink')}
-          />
-        </Grid>
-      
-      </Grid>
-
-        <Grid container spacing={2} paddingTop={2} sx={{ alignItems: 'stretch', height: 550 }}>
-          <Grid size={8} sx={{ display: 'flex', height: '100%' }}>
-            <FlowVisualizer
-              graph={graph}
-              onReset={clear}
-              onUndo={undo}
-              canUndo={canUndo}
-              selectedNodeId={selectedNodeId}
-              onSelectNode={handleSelectNode}
+              sinks={sinks}
+              onCreate={onCreateSink}
+              onTryWrite={onTryWrite}
+              onRemove={onRemoveSink}
+              selectedNodeLabel={selectedNode?.data.title}
+              canWrite={Boolean(selectedNode && selectedNode.kind !== 'sink')}
             />
           </Grid>
-
-          <Grid size={4} sx={{ display: 'flex', height: '100%' }}>
-            <ExplanationPanel lines={expl} />
-          </Grid>
-
+        
         </Grid>
-    </Container>
+
+          <Grid container spacing={2} paddingTop={2} sx={{ alignItems: 'stretch', height: 550 }}>
+            <Grid size={8} sx={{ display: 'flex', height: '100%' }}>
+              <FlowVisualizer
+                graph={graph}
+                onReset={clear}
+                onUndo={undo}
+                canUndo={canUndo}
+                selectedNodeId={selectedNodeId}
+                onSelectNode={handleSelectNode}
+              />
+            </Grid>
+
+            <Grid size={4} sx={{ display: 'flex', height: '100%' }}>
+              <ExplanationPanel lines={expl} />
+            </Grid>
+
+          </Grid>
+      </Container>
+    </ThemeProvider>
   );
 }

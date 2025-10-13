@@ -5,3 +5,5 @@ export const theme = createTheme({
   colorSchemes: { light: true, dark: true },
   typography: { fontFamily: ['Inter', 'system-ui', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'].join(',') },
 });
+
+export default createTheme;
