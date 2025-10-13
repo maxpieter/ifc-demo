@@ -7,5 +7,5 @@ export interface RuntimeLabel {
 
 export const makeLabel = (name: string): RuntimeLabel => ({
   id: name.toLowerCase().replace(/\s+/g, '-'),
-  name
+  name,
 });

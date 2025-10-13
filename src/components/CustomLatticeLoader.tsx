@@ -1,15 +1,23 @@
 import { useMemo, useState } from 'react';
 import {
-  Button, Card, CardContent, Grid2 as Grid, MenuItem, Select, Stack, TextField, Typography
+  Button,
+  Card,
+  CardContent,
+  Grid2 as Grid,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
 } from '@mui/material';
 import { addLabel, addLeq, Lattice } from '../models/Lattice';
 import { makeLabel, RuntimeLabel } from '../models/Label';
 
- export interface LabelEditorProps {
+export interface LabelEditorProps {
   lattice: Lattice;
   onChange: (lat: Lattice) => void;
 }
- 
+
 export default function CustomLatticeLoader({ lattice, onChange }: LabelEditorProps) {
   const [name, setName] = useState('');
   const [low, setLow] = useState('');
@@ -26,16 +34,23 @@ export default function CustomLatticeLoader({ lattice, onChange }: LabelEditorPr
   const addEdge = () => {
     if (!low || !high) return;
     onChange(addLeq(lattice, low, high));
-    setLow(''); setHigh('');
+    setLow('');
+    setHigh('');
   };
-return (
-  <Grid container spacing={2}>
-  <Card variant="outlined">
+  return (
+    <Grid container spacing={2}>
+      <Card variant="outlined">
         <CardContent>
           <Stack direction="row" spacing={3}>
-            <TextField label="New label (e.g. High)" value={name}
-              onChange={e => setName(e.target.value)} size="small" />
-            <Button variant="contained" onClick={addNew}>Add</Button>
+            <TextField
+              label="New label (e.g. High)"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              size="small"
+            />
+            <Button variant="contained" onClick={addNew}>
+              Add
+            </Button>
           </Stack>
         </CardContent>
       </Card>
@@ -50,12 +65,12 @@ return (
               size="small"
               value={low}
               displayEmpty
-              onChange={e => setLow(e.target.value)}
+              onChange={(e) => setLow(e.target.value)}
               renderValue={(selected) => {
                 if (selected === '') {
                   return <em>Low</em>;
                 }
-                return labelsArr.find(l => l.id === selected)?.name || selected;
+                return labelsArr.find((l) => l.id === selected)?.name || selected;
               }}
               sx={{
                 minWidth: 100,
@@ -64,7 +79,7 @@ return (
               <MenuItem disabled value="" sx={{ fontSize: '0.8rem', py: 0.5 }}>
                 <em>Low</em>
               </MenuItem>
-              {labelsArr.map(l => (
+              {labelsArr.map((l) => (
                 <MenuItem key={l.id} value={l.id} sx={{ fontSize: '0.8rem', py: 0.5 }}>
                   {l.name}
                 </MenuItem>
@@ -74,7 +89,7 @@ return (
               size="small"
               value={high}
               displayEmpty
-              onChange={e => setHigh(e.target.value)}
+              onChange={(e) => setHigh(e.target.value)}
               sx={{
                 minWidth: 100,
               }}
@@ -82,22 +97,24 @@ return (
                 if (selected === '') {
                   return <em>High</em>;
                 }
-                return labelsArr.find(l => l.id === selected)?.name || selected;
+                return labelsArr.find((l) => l.id === selected)?.name || selected;
               }}
             >
               <MenuItem disabled value="" sx={{ fontSize: '0.8rem', py: 0.5 }}>
                 <em>High</em>
               </MenuItem>
-              {labelsArr.map(l => (
+              {labelsArr.map((l) => (
                 <MenuItem key={l.id} value={l.id} sx={{ fontSize: '0.8rem', py: 0.5 }}>
                   {l.name}
                 </MenuItem>
               ))}
             </Select>
-            <Button variant="outlined" onClick={addEdge} size='small'>Add ≤ relation</Button>
+            <Button variant="outlined" onClick={addEdge} size="small">
+              Add ≤ relation
+            </Button>
           </Stack>
         </CardContent>
       </Card>
-      </Grid>
-);
+    </Grid>
+  );
 }

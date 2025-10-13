@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import ReactFlow, { Background, Controls, Node, Edge, applyNodeChanges, NodeChange, Position } from 'reactflow';
+import ReactFlow, {
+  Background,
+  Controls,
+  Node,
+  Edge,
+  applyNodeChanges,
+  NodeChange,
+  Position,
+} from 'reactflow';
 import { Card, CardContent, IconButton, Typography } from '@mui/material';
 import type { Lattice } from '../models/Lattice';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -13,28 +21,37 @@ type LatticeGraphProps = {
 };
 
 export default function LatticeGraph({ lattice, onReset, onUndo, canUndo }: LatticeGraphProps) {
-  const buildNodes = useCallback((): Node[] => (
-    Object.values(lattice.labels).map((l, idx) => ({
-      id: l.id,
-      data: { label: l.name },
-      position: { x: (idx % 5) * 160, y: (-idx % 5) * 100 },
-      sourcePosition: Position.Top,
-      targetPosition: Position.Bottom
-    }))
-  ), [lattice]);
+  const buildNodes = useCallback(
+    (): Node[] =>
+      Object.values(lattice.labels).map((l, idx) => ({
+        id: l.id,
+        data: { label: l.name },
+        position: { x: (idx % 5) * 160, y: (-idx % 5) * 100 },
+        sourcePosition: Position.Top,
+        targetPosition: Position.Bottom,
+      })),
+    [lattice]
+  );
 
-  const buildEdges = useCallback((): Edge[] => (
-    lattice.edges.map((e, i) => ({ id: String(i), source: e.from, target: e.to, animated: true }))
-  ), [lattice]);
+  const buildEdges = useCallback(
+    (): Edge[] =>
+      lattice.edges.map((e, i) => ({
+        id: String(i),
+        source: e.from,
+        target: e.to,
+        animated: true,
+      })),
+    [lattice]
+  );
 
   const [nodes, setNodes] = useState<Node[]>(() => buildNodes());
   const [edges, setEdges] = useState<Edge[]>(() => buildEdges());
 
   useEffect(() => {
-    setNodes(prev => {
-      const previousPositions = new Map(prev.map(n => [n.id, n.position]));
+    setNodes((prev) => {
+      const previousPositions = new Map(prev.map((n) => [n.id, n.position]));
       const next = buildNodes();
-      return next.map(node => {
+      return next.map((node) => {
         const pos = previousPositions.get(node.id);
         return pos ? { ...node, position: pos } : node;
       });
@@ -56,14 +73,16 @@ export default function LatticeGraph({ lattice, onReset, onUndo, canUndo }: Latt
   }, [onUndo]);
 
   const onNodesChange = useCallback(
-    (changes: NodeChange[]) => setNodes(nds => applyNodeChanges(changes, nds)),
+    (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
     []
   );
 
   return (
     <Card variant="outlined" sx={{ height: 360, width: '100%' }}>
       <CardContent sx={{ height: 1, p: 0 }}>
-        <Typography variant="subtitle1" sx={{ p: 1 }}>Lattice Graph</Typography>
+        <Typography variant="subtitle1" sx={{ p: 1 }}>
+          Lattice Graph
+        </Typography>
         <div style={{ height: 300, position: 'relative' }}>
           <IconButton
             size="small"
@@ -76,7 +95,7 @@ export default function LatticeGraph({ lattice, onReset, onUndo, canUndo }: Latt
               zIndex: 10,
               bgcolor: 'background.paper',
               boxShadow: 1,
-              '&:hover': { bgcolor: 'background.paper' }
+              '&:hover': { bgcolor: 'background.paper' },
             }}
           >
             <RefreshIcon fontSize="small" />
@@ -93,12 +112,18 @@ export default function LatticeGraph({ lattice, onReset, onUndo, canUndo }: Latt
               zIndex: 10,
               bgcolor: 'background.paper',
               boxShadow: 1,
-              '&:hover': { bgcolor: 'background.paper' }
+              '&:hover': { bgcolor: 'background.paper' },
             }}
           >
             <UndoIcon fontSize="small" />
           </IconButton>
-          <ReactFlow nodes={nodes} edges={edges} fitView nodesDraggable onNodesChange={onNodesChange}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            fitView
+            nodesDraggable
+            onNodesChange={onNodesChange}
+          >
             <Background />
             <Controls />
           </ReactFlow>

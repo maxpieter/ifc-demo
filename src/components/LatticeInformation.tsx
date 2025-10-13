@@ -1,7 +1,14 @@
 import { useMemo } from 'react';
 import {
-  Card, CardContent, Divider, Grid2 as Grid,
-  List, ListItem, ListItemText, Stack, Typography
+  Card,
+  CardContent,
+  Divider,
+  Grid2 as Grid,
+  List,
+  ListItem,
+  ListItemText,
+  Stack,
+  Typography,
 } from '@mui/material';
 import { Lattice } from '../models/Lattice';
 
@@ -15,7 +22,6 @@ export default function LatticeInformation({ lattice, onChange }: LatticeInforma
 
   return (
     <Stack spacing={2}>
-
       <Grid container spacing={2}>
         {/* <Grid size={12}>
           <Card variant="outlined">

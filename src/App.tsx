@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Container, CssBaseline, Divider, Grid2 as Grid, Stack, Tab, Tabs, ThemeProvider, Typography } from '@mui/material';
+import {
+  Box,
+  Container,
+  CssBaseline,
+  Divider,
+  Grid2 as Grid,
+  Stack,
+  Tab,
+  Tabs,
+  ThemeProvider,
+  Typography,
+} from '@mui/material';
 import { emptyLattice } from './models/Lattice';
 import type { Lattice } from './models/Lattice';
 import { RuntimeLabel } from './models/Label';
@@ -28,7 +39,7 @@ type Src = {
   lio: any;
 };
 
-type Sink = { id: string; name: string; label: RuntimeLabel; };
+type Sink = { id: string; name: string; label: RuntimeLabel };
 
 type Snapshot = {
   lattice: Lattice;
@@ -74,25 +85,30 @@ export default function App() {
     [mode]
   );
 
-
-  const runAction = useCallback((action: () => void) => {
-    setHistory(prev => [...prev, {
-      lattice,
-      sources,
-      sinks,
-      graph,
-      expl,
-      selectedNodeId
-    }]);
-    action();
-  }, [lattice, sources, sinks, graph, expl, selectedNodeId]);
+  const runAction = useCallback(
+    (action: () => void) => {
+      setHistory((prev) => [
+        ...prev,
+        {
+          lattice,
+          sources,
+          sinks,
+          graph,
+          expl,
+          selectedNodeId,
+        },
+      ]);
+      action();
+    },
+    [lattice, sources, sinks, graph, expl, selectedNodeId]
+  );
 
   const pushExplanation = useCallback((s: string) => {
-    setExplState(prev => [s, ...prev].slice(0, 50));
+    setExplState((prev) => [s, ...prev].slice(0, 50));
   }, []);
 
   const undo = useCallback(() => {
-    setHistory(prev => {
+    setHistory((prev) => {
       if (!prev.length) return prev;
       const snapshot = prev[prev.length - 1];
       setLatticeState(snapshot.lattice);
@@ -140,21 +156,32 @@ export default function App() {
     );
   }
 
-
   // add a source
-  const onCreateSource = (s: { id: string; value: string; rtLabel: RuntimeLabel; ifcLabel: any; lio: any; }) => {
+  const onCreateSource = (s: {
+    id: string;
+    value: string;
+    rtLabel: RuntimeLabel;
+    ifcLabel: any;
+    lio: any;
+  }) => {
     runAction(() => {
       const title = `${s.value}`;
       const nodeId = s.id;
-      setSourcesState(prev => [...prev, { id: nodeId, title, value: s.value, rtLabel: s.rtLabel, ifcLabel: s.ifcLabel, lio: s.lio }]);
-      setGraphState(prev => ({
-        nodes: [...prev.nodes, {
-          id: nodeId,
-          kind: 'source',
-          position: { x: 40 + prev.nodes.length * 40, y: 60 },
-          data: { title, value: s.value, label: s.rtLabel }
-        }],
-        edges: [...prev.edges]
+      setSourcesState((prev) => [
+        ...prev,
+        { id: nodeId, title, value: s.value, rtLabel: s.rtLabel, ifcLabel: s.ifcLabel, lio: s.lio },
+      ]);
+      setGraphState((prev) => ({
+        nodes: [
+          ...prev.nodes,
+          {
+            id: nodeId,
+            kind: 'source',
+            position: { x: 40 + prev.nodes.length * 40, y: 60 },
+            data: { title, value: s.value, label: s.rtLabel },
+          },
+        ],
+        edges: [...prev.edges],
       }));
       setSelectedNodeId(nodeId);
       pushExplanation(`Created source with value="${s.value}" and label ${s.rtLabel.name}.`);
@@ -163,54 +190,71 @@ export default function App() {
 
   // add map/combine nodes
   const onCompose = (node: {
-    id: string; title: string; labelName: string; value: unknown; kind: 'map' | 'combine'; parents: string[];
+    id: string;
+    title: string;
+    labelName: string;
+    value: unknown;
+    kind: 'map' | 'combine';
+    parents: string[];
   }) => {
-    const rt = Object.values(lattice.labels).find(l => l.id === node.labelName) 
-        ?? { 
-             id: node.labelName.toLowerCase().replace(/\s+/g, '-'), 
-             name: node.labelName 
-           };
+    const rt = Object.values(lattice.labels).find((l) => l.id === node.labelName) ?? {
+      id: node.labelName.toLowerCase().replace(/\s+/g, '-'),
+      name: node.labelName,
+    };
     runAction(() => {
-      setGraphState(prev => ({
-        nodes: [...prev.nodes, {
-          id: node.id,
-          kind: node.kind,
-          position: { x: 160 + prev.nodes.length * 40, y: 180 },
-          data: { title: node.title, value: node.value, label: rt }
-        }],
-        edges: [...prev.edges, ...node.parents.map((p, i) => ({ id: `${node.id}-${i}`, from: p, to: node.id, label: node.kind }))]
+      setGraphState((prev) => ({
+        nodes: [
+          ...prev.nodes,
+          {
+            id: node.id,
+            kind: node.kind,
+            position: { x: 160 + prev.nodes.length * 40, y: 180 },
+            data: { title: node.title, value: node.value, label: rt },
+          },
+        ],
+        edges: [
+          ...prev.edges,
+          ...node.parents.map((p, i) => ({
+            id: `${node.id}-${i}`,
+            from: p,
+            to: node.id,
+            label: node.kind,
+          })),
+        ],
       }));
       setSelectedNodeId(node.id);
-      pushExplanation(`${node.kind === 'map' ? 'Mapped' : 'Combined'} → new node label approximated as ${rt.name}.`);
+      pushExplanation(
+        `${node.kind === 'map' ? 'Mapped' : 'Combined'} → new node label approximated as ${rt.name}.`
+      );
     });
   };
 
   const onCreateSink = (s: Sink) => {
     runAction(() => {
-      setSinksState(prev => [...prev, s]);
+      setSinksState((prev) => [...prev, s]);
       pushExplanation(`Created sink "${s.name}" with label ${s.label.name}.`);
     });
   };
 
   const onRemoveSink = (sinkId: string) => {
-    const sink = sinks.find(s => s.id === sinkId);
+    const sink = sinks.find((s) => s.id === sinkId);
     if (!sink) return;
     runAction(() => {
-      setSinksState(prev => prev.filter(s => s.id !== sinkId));
-      setGraphState(prev => {
+      setSinksState((prev) => prev.filter((s) => s.id !== sinkId));
+      setGraphState((prev) => {
         const targetId = `sink-${sinkId}`;
-        const nodes = prev.nodes.filter(n => n.id !== targetId);
-        const edges = prev.edges.filter(e => e.from !== targetId && e.to !== targetId);
+        const nodes = prev.nodes.filter((n) => n.id !== targetId);
+        const edges = prev.edges.filter((e) => e.from !== targetId && e.to !== targetId);
         return { nodes, edges };
       });
-      setSelectedNodeId(prev => (prev === `sink-${sinkId}` ? undefined : prev));
+      setSelectedNodeId((prev) => (prev === `sink-${sinkId}` ? undefined : prev));
       pushExplanation(`Removed sink "${sink.name}".`);
     });
   };
 
   // attempt to write into a sink: check leq(valueLabel, sinkLabel)
   const onTryWrite = (sinkId: string) => {
-    const sink = sinks.find(s => s.id === sinkId);
+    const sink = sinks.find((s) => s.id === sinkId);
     if (!sink) return;
     // pick the last node as "current output" for demo; a real app would let user select
     if (!selectedNodeId) {
@@ -218,7 +262,7 @@ export default function App() {
       return;
     }
 
-    const current = graph.nodes.find(n => n.id === selectedNodeId);
+    const current = graph.nodes.find((n) => n.id === selectedNodeId);
     if (!current) {
       pushExplanation('Selected node no longer exists.');
       setSelectedNodeId(undefined);
@@ -234,32 +278,47 @@ export default function App() {
     const ok = ifcLeq(lattice, vLblIfc, sLblIfc, fromIfcLabel);
 
     runAction(() => {
-      setGraphState(prev => {
-        const e = { id: `${current.id}->sink-${sink.id}`, from: current.id, to: `sink-${sink.id}`, label: 'write', violation: !ok };
+      setGraphState((prev) => {
+        const e = {
+          id: `${current.id}->sink-${sink.id}`,
+          from: current.id,
+          to: `sink-${sink.id}`,
+          label: 'write',
+          violation: !ok,
+        };
         const sinkNode = {
           id: `sink-${sink.id}`,
           kind: 'sink' as const,
           position: { x: current.position.x + 240, y: current.position.y },
-          data: { title: `sink(${sink.name})`, label: sink.label, violation: !ok }
+          data: { title: `sink(${sink.name})`, label: sink.label, violation: !ok },
         };
-        const nodes = prev.nodes.some(n => n.id === sinkNode.id) ? prev.nodes : [...prev.nodes, sinkNode];
+        const nodes = prev.nodes.some((n) => n.id === sinkNode.id)
+          ? prev.nodes
+          : [...prev.nodes, sinkNode];
         const edges = [...prev.edges, e];
         return { nodes, edges };
       });
 
       if (ok) {
-        pushExplanation(`Allowed: value label = ${current.data.label.name} ≤ sink label = ${sink.label.name}. Flow permitted.`);
+        pushExplanation(
+          `Allowed: value label = ${current.data.label.name} ≤ sink label = ${sink.label.name}. Flow permitted.`
+        );
       } else {
-        pushExplanation(`Rejected: join(${current.data.label.name}) ⊑ ${sink.label.name} is false → flow blocked.`);
+        pushExplanation(
+          `Rejected: join(${current.data.label.name}) ⊑ ${sink.label.name} is false → flow blocked.`
+        );
       }
     });
   };
 
-  const handleLatticeChange = useCallback((lat: Lattice) => {
-    runAction(() => {
-      setLatticeState(lat);
-    });
-  }, [runAction]);
+  const handleLatticeChange = useCallback(
+    (lat: Lattice) => {
+      runAction(() => {
+        setLatticeState(lat);
+      });
+    },
+    [runAction]
+  );
 
   const clear = useCallback(() => {
     runAction(() => {
@@ -269,7 +328,7 @@ export default function App() {
       setGraphState(emptyGraph());
       setExplState([]);
       setSelectedNodeId(undefined);
-      setResetToken(t => t + 1);
+      setResetToken((t) => t + 1);
     });
   }, [runAction]);
 
@@ -277,41 +336,40 @@ export default function App() {
     setSelectedNodeId(nodeId);
   }, []);
 
-  const selectedNode = selectedNodeId ? graph.nodes.find(n => n.id === selectedNodeId) : undefined;
+  const selectedNode = selectedNodeId
+    ? graph.nodes.find((n) => n.id === selectedNodeId)
+    : undefined;
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Container sx={{ py: 5 }}>
-        <Stack direction='row' justifyContent='space-between'>
-          <Typography variant="h4" gutterBottom>ifc-ts Interactive Demo</Typography>
+        <Stack direction="row" justifyContent="space-between">
+          <Typography variant="h4" gutterBottom>
+            ifc-ts Interactive Demo
+          </Typography>
           <MUISwitch
             checked={mode === 'dark'}
-            onChange={() => setMode(prev => (prev === 'light' ? 'dark' : 'light'))}
-            name="theme">
-          </MUISwitch>
+            onChange={() => setMode((prev) => (prev === 'light' ? 'dark' : 'light'))}
+            name="theme"
+          ></MUISwitch>
         </Stack>
 
-        <Typography variant="body1" sx={{ mb: 2}}>
-            Explore label-based IFC: define a lattice, create Labeled IO, compose flows, and try writes to sinks.
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          Explore label-based IFC: define a lattice, create Labeled IO, compose flows, and try
+          writes to sinks.
         </Typography>
-        
+
         <Grid container padding={1}>
           <Theory />
         </Grid>
-          
-        <Divider sx={{ my: 5 }} >Lattice Construction</Divider>
+
+        <Divider sx={{ my: 5 }}>Lattice Construction</Divider>
 
         <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
-          
           <Grid size={4}>
             {/* Tabs header */}
-            <Tabs
-              value={value}
-              onChange={handleChange}
-              aria-label="lattice editor tabs"
-              centered
-            >
+            <Tabs value={value} onChange={handleChange} aria-label="lattice editor tabs" centered>
               <Tab label="Preset Lattice" {...a11yProps(0)} />
               <Tab label="Custom Lattice" {...a11yProps(1)} />
             </Tabs>
@@ -333,25 +391,28 @@ export default function App() {
           <Grid size={2.5}>
             <LatticeInformation lattice={lattice} onChange={handleLatticeChange} />
           </Grid>
-        
         </Grid>
 
-          <Divider sx={{ my: 5 }}>Information Flow</Divider>
-        
-        <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
+        <Divider sx={{ my: 5 }}>Information Flow</Divider>
 
+        <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
           <Grid size={12}>
             <SourceFetcher lattice={lattice} onCreate={onCreateSource} resetToken={resetToken} />
           </Grid>
 
           <Grid size={8} sx={{ display: 'flex' }}>
             <FlowComposer
-                lattice={lattice}
-                sources={sources.map(s => ({
-                  id: s.id, title: s.title, labelId: s.rtLabel.id, ifcLabel: s.ifcLabel, value: s.value, lio: s.lio
-                }))}
-                onNode={onCompose}
-                />
+              lattice={lattice}
+              sources={sources.map((s) => ({
+                id: s.id,
+                title: s.title,
+                labelId: s.rtLabel.id,
+                ifcLabel: s.ifcLabel,
+                value: s.value,
+                lio: s.lio,
+              }))}
+              onNode={onCompose}
+            />
           </Grid>
 
           <Grid size={4} sx={{ display: 'flex' }}>
@@ -365,26 +426,24 @@ export default function App() {
               canWrite={Boolean(selectedNode && selectedNode.kind !== 'sink')}
             />
           </Grid>
-        
         </Grid>
 
-          <Grid container spacing={2} paddingTop={2} sx={{ alignItems: 'stretch', height: 550 }}>
-            <Grid size={8} sx={{ display: 'flex', height: '100%' }}>
-              <FlowVisualizer
-                graph={graph}
-                onReset={clear}
-                onUndo={undo}
-                canUndo={canUndo}
-                selectedNodeId={selectedNodeId}
-                onSelectNode={handleSelectNode}
-              />
-            </Grid>
-
-            <Grid size={4} sx={{ display: 'flex', height: '100%' }}>
-              <ExplanationPanel lines={expl} />
-            </Grid>
-
+        <Grid container spacing={2} paddingTop={2} sx={{ alignItems: 'stretch', height: 550 }}>
+          <Grid size={8} sx={{ display: 'flex', height: '100%' }}>
+            <FlowVisualizer
+              graph={graph}
+              onReset={clear}
+              onUndo={undo}
+              canUndo={canUndo}
+              selectedNodeId={selectedNodeId}
+              onSelectNode={handleSelectNode}
+            />
           </Grid>
+
+          <Grid size={4} sx={{ display: 'flex', height: '100%' }}>
+            <ExplanationPanel lines={expl} />
+          </Grid>
+        </Grid>
       </Container>
     </ThemeProvider>
   );

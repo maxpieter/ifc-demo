@@ -18,7 +18,7 @@ export const addLabel = (lat: Lattice, label: RuntimeLabel): Lattice => {
 
 export const addLeq = (lat: Lattice, low: LabelId, high: LabelId): Lattice => {
   if (low === high) return lat;
-  const exists = lat.edges.some(e => e.from === low && e.to === high);
+  const exists = lat.edges.some((e) => e.from === low && e.to === high);
   if (exists) return lat;
   return { ...lat, edges: [...lat.edges, { from: low, to: high }] };
 };
@@ -35,7 +35,10 @@ export const leq = (lat: Lattice, a: LabelId, b: LabelId): boolean => {
     const x = q.shift()!;
     for (const y of g[x] || []) {
       if (y === b) return true;
-      if (!seen.has(y)) { seen.add(y); q.push(y); }
+      if (!seen.has(y)) {
+        seen.add(y);
+        q.push(y);
+      }
     }
   }
   return false;
@@ -45,11 +48,11 @@ export const leq = (lat: Lattice, a: LabelId, b: LabelId): boolean => {
 export const join = (lat: Lattice, a: LabelId, b: LabelId): LabelId | undefined => {
   // upper bounds are labels u s.t. a ≤ u and b ≤ u
   const all = Object.keys(lat.labels);
-  const ubs = all.filter(u => leq(lat, a, u) && leq(lat, b, u));
+  const ubs = all.filter((u) => leq(lat, a, u) && leq(lat, b, u));
   // pick minimal among ubs: no v in ubs with v < u
   const minimal: LabelId[] = [];
   for (const u of ubs) {
-    const smaller = ubs.some(v => v !== u && leq(lat, v, u) && !leq(lat, u, v));
+    const smaller = ubs.some((v) => v !== u && leq(lat, v, u) && !leq(lat, u, v));
     if (!smaller) minimal.push(u);
   }
   // unique minimal upper bound

@@ -27,8 +27,12 @@ export default function PresetLatticeLoader({ onLoad }: { onLoad: (lat: Lattice)
     <Card variant="outlined">
       <CardContent>
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" onClick={simple}>Low ≤ High</Button>
-          <Button variant="outlined" onClick={three}>Public ≤ Internal ≤ Secret</Button>
+          <Button variant="outlined" onClick={simple}>
+            Low ≤ High
+          </Button>
+          <Button variant="outlined" onClick={three}>
+            Public ≤ Internal ≤ Secret
+          </Button>
         </Stack>
       </CardContent>
     </Card>

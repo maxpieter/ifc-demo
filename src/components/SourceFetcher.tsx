@@ -17,8 +17,12 @@ const defaultValue = 'Foo';
 export default function SourceFetcher({
   lattice,
   onCreate,
-  resetToken
-}: { lattice: Lattice; onCreate: (s: SourceCard) => void; resetToken: number; }) {
+  resetToken,
+}: {
+  lattice: Lattice;
+  onCreate: (s: SourceCard) => void;
+  resetToken: number;
+}) {
   const labels = useMemo(() => Object.values(lattice.labels), [lattice]);
   const [value, setValue] = useState(defaultValue);
   const [labelId, setLabelId] = useState<string>('');
@@ -29,7 +33,7 @@ export default function SourceFetcher({
   }, [resetToken]);
 
   const create = () => {
-    const rtLabel = labels.find(l => l.id === labelId);
+    const rtLabel = labels.find((l) => l.id === labelId);
     if (!rtLabel) return;
     const ifcLabel = toIfcLabel(rtLabel);
     const lio = pure(ifcLabel, value); // actively uses ifc-ts wrapper
@@ -46,11 +50,30 @@ export default function SourceFetcher({
           Creates a labeled source using <code>LIO</code>.
         </Typography>
         <Stack direction="row" spacing={1}>
-          <TextField label="Value" size="small" fullWidth value={value} onChange={e => setValue(e.target.value)} />
-          <TextField select label="Label" size="small" sx={{ minWidth: 160 }} value={labelId} onChange={e => setLabelId(e.target.value)}>
-            {labels.map(l => <MenuItem key={l.id} value={l.id}>{l.name}</MenuItem>)}
+          <TextField
+            label="Value"
+            size="small"
+            fullWidth
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+          />
+          <TextField
+            select
+            label="Label"
+            size="small"
+            sx={{ minWidth: 160 }}
+            value={labelId}
+            onChange={(e) => setLabelId(e.target.value)}
+          >
+            {labels.map((l) => (
+              <MenuItem key={l.id} value={l.id}>
+                {l.name}
+              </MenuItem>
+            ))}
           </TextField>
-          <Button variant="contained" onClick={create} disabled={!labelId}>Create</Button>
+          <Button variant="contained" onClick={create} disabled={!labelId}>
+            Create
+          </Button>
         </Stack>
       </CardContent>
     </Card>

@@ -1,14 +1,30 @@
 import { useState } from 'react';
 import {
-  Box, Button, Card, CardContent, MenuItem, Stack, TextField, Typography
+  Box,
+  Button,
+  Card,
+  CardContent,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
 } from '@mui/material';
 import { Lattice, join as rtJoin } from '../models/Lattice';
 import { map, join, fromIfcLabel } from '../ifcClient';
 
-interface SourceSel { id: string; labelId: string; title: string; ifcLabel: any; value: string; lio: any; }
+interface SourceSel {
+  id: string;
+  labelId: string;
+  title: string;
+  ifcLabel: any;
+  value: string;
+  lio: any;
+}
 
 export default function FlowComposer({
-  lattice, sources, onNode
+  lattice,
+  sources,
+  onNode,
 }: {
   lattice: Lattice;
   sources: SourceSel[];
@@ -21,13 +37,13 @@ export default function FlowComposer({
     parents: string[];
   }) => void;
 }) {
-  const [left, setLeft] = useState<string>('');    
-  const [right, setRight] = useState<string>('');  
+  const [left, setLeft] = useState<string>('');
+  const [right, setRight] = useState<string>('');
   const [mapSrc, setMapSrc] = useState<string>('');
   const [mapSuffix, setMapSuffix] = useState(' Bar');
 
   const mapAction = () => {
-    const s = sources.find(x => x.id === mapSrc);
+    const s = sources.find((x) => x.id === mapSrc);
     if (!s) return;
     const mapped = map(s.lio, (v: string) => v + mapSuffix);
     onNode({
@@ -36,18 +52,20 @@ export default function FlowComposer({
       labelName: fromIfcLabel(mapped.label) ?? s.labelId,
       value: mapped.value,
       kind: 'map',
-      parents: [s.id]
+      parents: [s.id],
     });
   };
 
   const combineAction = () => {
-    const a = sources.find(x => x.id === left);
-    const b = sources.find(x => x.id === right);
+    const a = sources.find((x) => x.id === left);
+    const b = sources.find((x) => x.id === right);
     if (!a || !b) return;
 
     // Use ifc-ts join if available; else runtime
     const jIfc = join(lattice, a.ifcLabel, b.ifcLabel, fromIfcLabel);
-    const jName = jIfc ? (fromIfcLabel(jIfc) ?? 'unknown') : (rtJoin(lattice, a.labelId, b.labelId) ?? 'unknown');
+    const jName = jIfc
+      ? (fromIfcLabel(jIfc) ?? 'unknown')
+      : (rtJoin(lattice, a.labelId, b.labelId) ?? 'unknown');
     const value = `${a.value} + ${b.value}`;
 
     onNode({
@@ -56,36 +74,85 @@ export default function FlowComposer({
       labelName: jName,
       value,
       kind: 'combine',
-      parents: [a.id, b.id]
+      parents: [a.id, b.id],
     });
   };
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column'}}>
+    <Card
+      variant="outlined"
+      sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}
+    >
+      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography variant="h6">Flow Composer</Typography>
         <Stack spacing={2} sx={{ flexGrow: 1 }}>
           <Box>
-            <Typography variant="subtitle2" padding={1}>Transform: Pick one source and apply a simple transformation</Typography>
+            <Typography variant="subtitle2" padding={1}>
+              Transform: Pick one source and apply a simple transformation
+            </Typography>
             <Stack direction="row" spacing={1}>
-              <TextField select size="small" label="Source" value={mapSrc} onChange={e => setMapSrc(e.target.value)} sx={{ minWidth: 220 }}>
-                {sources.map(s => <MenuItem key={s.id} value={s.id}>{s.title}</MenuItem>)}
+              <TextField
+                select
+                size="small"
+                label="Source"
+                value={mapSrc}
+                onChange={(e) => setMapSrc(e.target.value)}
+                sx={{ minWidth: 220 }}
+              >
+                {sources.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>
+                    {s.title}
+                  </MenuItem>
+                ))}
               </TextField>
-              <TextField size="small" label="Append text" value={mapSuffix} onChange={e => setMapSuffix(e.target.value)} />
-              <Button variant="outlined" onClick={mapAction} disabled={!mapSrc}>Add map node</Button>
+              <TextField
+                size="small"
+                label="Append text"
+                value={mapSuffix}
+                onChange={(e) => setMapSuffix(e.target.value)}
+              />
+              <Button variant="outlined" onClick={mapAction} disabled={!mapSrc}>
+                Add map node
+              </Button>
             </Stack>
           </Box>
 
           <Box>
-            <Typography variant="subtitle2" padding={1}>Combine: Computes the least upper bound (join) of the labels</Typography>
+            <Typography variant="subtitle2" padding={1}>
+              Combine: Computes the least upper bound (join) of the labels
+            </Typography>
             <Stack direction="row" spacing={1}>
-              <TextField select size="small" label="Left source" value={left} onChange={e => setLeft(e.target.value)} sx={{ minWidth: 220 }}>
-                {sources.map(s => <MenuItem key={s.id} value={s.id}>{s.title}</MenuItem>)}
+              <TextField
+                select
+                size="small"
+                label="Left source"
+                value={left}
+                onChange={(e) => setLeft(e.target.value)}
+                sx={{ minWidth: 220 }}
+              >
+                {sources.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>
+                    {s.title}
+                  </MenuItem>
+                ))}
               </TextField>
-              <TextField select size="small" label="Right source" value={right} onChange={e => setRight(e.target.value)} sx={{ minWidth: 220 }}>
-                {sources.map(s => <MenuItem key={s.id} value={s.id}>{s.title}</MenuItem>)}
+              <TextField
+                select
+                size="small"
+                label="Right source"
+                value={right}
+                onChange={(e) => setRight(e.target.value)}
+                sx={{ minWidth: 220 }}
+              >
+                {sources.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>
+                    {s.title}
+                  </MenuItem>
+                ))}
               </TextField>
-              <Button variant="outlined" onClick={combineAction} disabled={!left || !right}>Add combine node</Button>
+              <Button variant="outlined" onClick={combineAction} disabled={!left || !right}>
+                Add combine node
+              </Button>
             </Stack>
           </Box>
         </Stack>
