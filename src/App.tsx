@@ -262,7 +262,7 @@ export default function App() {
         <Theory />
       </Grid>
         
-      <Divider sx={{ my: 3 }} />
+      <Divider sx={{ my: 5 }} >Lattice Construction</Divider>
 
       <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
         
@@ -295,6 +295,12 @@ export default function App() {
         <Grid size={2.5}>
           <LatticeInformation lattice={lattice} onChange={handleLatticeChange} />
         </Grid>
+      
+      </Grid>
+
+        <Divider sx={{ my: 5 }}>Information Flow</Divider>
+      
+      <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
 
         <Grid size={12}>
           <SourceFetcher lattice={lattice} onCreate={onCreateSource} resetToken={resetToken} />
@@ -321,8 +327,7 @@ export default function App() {
             canWrite={Boolean(selectedNode && selectedNode.kind !== 'sink')}
           />
         </Grid>
-        
-
+      
       </Grid>
 
         <Grid container spacing={2} paddingTop={2} sx={{ alignItems: 'stretch', height: 520 }}>
