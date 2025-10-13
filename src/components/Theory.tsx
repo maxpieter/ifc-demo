@@ -1,4 +1,4 @@
-import { Paper, Typography, Stack, Box, Divider } from '@mui/material';
+import { Paper, Typography, Box, Divider } from '@mui/material';
 
 export default function Theory() {
   return (
