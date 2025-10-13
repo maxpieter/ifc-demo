@@ -1,7 +1,6 @@
 # IFC-TS Demo
 
-An interactive React + TypeScript app for exploring **Information Flow Control (IFC)** using security lattices and labeled data flows.  
-This demo lets you:
+This interactive demo for exploring **Information Flow Control (IFC)** using security lattices and labeled data flows lets you:
 
 - Define lattices of security labels (e.g. *Low ≤ High*).  
 - Create labeled data sources and compose flows with transformations and joins.  
