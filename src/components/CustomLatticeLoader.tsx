@@ -58,19 +58,7 @@ return (
                 return labelsArr.find(l => l.id === selected)?.name || selected;
               }}
               sx={{
-                minWidth: 100,        // reduce width
-                fontSize: '0.75rem',  // smaller font
-                '& .MuiSelect-select': {
-                  py: 0.25,           // less vertical padding inside
-                },
-              }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    width: 50,       // set dropdown width
-                    maxHeight: 100,   // control dropdown height
-                  },
-                },
+                minWidth: 100,
               }}
             >
               <MenuItem disabled value="" sx={{ fontSize: '0.8rem', py: 0.5 }}>
@@ -88,25 +76,13 @@ return (
               displayEmpty
               onChange={e => setHigh(e.target.value)}
               sx={{
-                minWidth: 100,        // reduce width
-                fontSize: '0.75rem',  // smaller font
-                '& .MuiSelect-select': {
-                  py: 0.25,           // less vertical padding inside
-                },
+                minWidth: 100,
               }}
               renderValue={(selected) => {
                 if (selected === '') {
                   return <em>High</em>;
                 }
                 return labelsArr.find(l => l.id === selected)?.name || selected;
-              }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    width: 50,       // set dropdown width
-                    maxHeight: 100,   // control dropdown height
-                  },
-                },
               }}
             >
               <MenuItem disabled value="" sx={{ fontSize: '0.8rem', py: 0.5 }}>

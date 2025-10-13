@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import ReactFlow, { Background, Controls, Node, Edge, applyNodeChanges, NodeChange } from 'reactflow';
+import ReactFlow, { Background, Controls, Node, Edge, applyNodeChanges, NodeChange, Position } from 'reactflow';
 import { Card, CardContent, IconButton, Typography } from '@mui/material';
 import type { Lattice } from '../models/Lattice';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -17,7 +17,9 @@ export default function LatticeGraph({ lattice, onReset, onUndo, canUndo }: Latt
     Object.values(lattice.labels).map((l, idx) => ({
       id: l.id,
       data: { label: l.name },
-      position: { x: (idx % 5) * 160, y: Math.floor(idx / 5) * 100 }
+      position: { x: (idx % 5) * 160, y: (-idx % 5) * 100 },
+      sourcePosition: Position.Top,
+      targetPosition: Position.Bottom
     }))
   ), [lattice]);
 

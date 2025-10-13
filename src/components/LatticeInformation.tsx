@@ -17,7 +17,7 @@ export default function LatticeInformation({ lattice, onChange }: LatticeInforma
     <Stack spacing={2}>
 
       <Grid container spacing={2}>
-        <Grid size={6}>
+        {/* <Grid size={12}>
           <Card variant="outlined">
             <CardContent>
               <Typography variant="subtitle1">Labels</Typography>
@@ -31,8 +31,8 @@ export default function LatticeInformation({ lattice, onChange }: LatticeInforma
               </List>
             </CardContent>
           </Card>
-        </Grid>
-        <Grid size={6}>
+        </Grid> */}
+        <Grid size={12}>
           <Card variant="outlined">
             <CardContent>
               <Typography variant="subtitle1">Relations (≤)</Typography>

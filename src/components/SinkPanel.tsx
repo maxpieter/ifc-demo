@@ -58,9 +58,9 @@ export default function SinkPanel({
         <Typography variant="caption" color={canWrite ? 'text.secondary' : 'warning.main'}>
           {selectedNodeLabel ? `Writing from: ${selectedNodeLabel}` : 'Select a node in the flow to enable writes.'}
         </Typography>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+        <Stack direction="row" sx={{ flexWrap: 'wrap' }}>
           {sinks.map(s => (
-            <Stack key={s.id} direction="row" spacing={0.5} alignItems="center">
+            <Stack key={s.id} direction="row" padding={0.2} alignItems="center">
               <Button variant="contained" onClick={() => onTryWrite(s.id)} disabled={!canWrite}>
                 Write to {s.name} [{s.label.name}]
               </Button>

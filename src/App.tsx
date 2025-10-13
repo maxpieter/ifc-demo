@@ -261,10 +261,11 @@ export default function App() {
       <Grid container padding={1}>
         <Theory />
       </Grid>
-
+        
       <Divider sx={{ my: 3 }} />
 
       <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
+        
         <Grid size={4}>
           {/* Tabs header */}
           <Tabs
@@ -287,11 +288,11 @@ export default function App() {
           </CustomTabPanel>
         </Grid>
 
-        <Grid size={8}>
+        <Grid size={5.5}>
           <LatticeGraph lattice={lattice} onReset={clear} onUndo={undo} canUndo={canUndo} />
         </Grid>
 
-        <Grid size={8}>
+        <Grid size={2.5}>
           <LatticeInformation lattice={lattice} onChange={handleLatticeChange} />
         </Grid>
 
