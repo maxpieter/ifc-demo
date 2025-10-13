@@ -7,7 +7,7 @@ This interactive demo for exploring **Information Flow Control (IFC)** using sec
 - Define sinks with required labels and test writes against IFC rules.  
 - Visualize flows, violations, and explanations using React Flow.
 
-<img width="1388" height="905" alt="image" src="https://github.com/user-attachments/assets/f0fe360d-eac8-4327-a54a-bd1d12c39142" />
+<img width="599" height="805" alt="image" src="https://github.com/user-attachments/assets/7bbe9b6e-fd09-4a20-9194-545112e6aa44" />
 
 
 ---
