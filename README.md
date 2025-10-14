@@ -29,7 +29,7 @@ Interactive demo for exploring **Information Flow Control (IFC)** using security
    ```
    The demo will be available at http://localhost:5173.
 
-### Credits
+## Credits
 
 This project builds on and demonstrates concepts from [ifc-ts](https://github.com/willardthor/ifc-ts),
 a TypeScript library for information flow control.
