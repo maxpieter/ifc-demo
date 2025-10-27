@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "homepage": "https://maxpieter.github.io/ifc-demo",
+  "homepage": "https://maxpieter.github.io/ifc-ts-demo",
   "scripts": {
     "dev": "vite",
     "build": "node ./node_modules/typescript/bin/tsc --noEmit && vite build",
