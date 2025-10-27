@@ -29,6 +29,7 @@ import CustomLatticeLoader from './components/CustomLatticeLoader';
 import Theory from './components/Theory';
 import createTheme from './theme';
 import MUISwitch from './components/MUISwitch';
+import CodeExporter from './components/CodeExporter';
 
 type Src = {
   id: string;
@@ -445,6 +446,10 @@ export default function App() {
             <ExplanationPanel lines={expl} />
           </Grid>
         </Grid>
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+          <CodeExporter lattice={lattice} sources={sources} sinks={sinks} graph={graph} />
+        </Box>
       </Container>
     </ThemeProvider>
   );
