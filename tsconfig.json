@@ -9,9 +9,7 @@
     "strict": true,
     "skipLibCheck": true,
     "baseUrl": ".",
-    "paths": {
-      "ifc-ts": ["../ifc-ts/src"]
-    }
+    "noEmit": true
   },
   "include": ["src"],
 }

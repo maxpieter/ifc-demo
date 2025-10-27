@@ -2,11 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  base: mode === 'gh-pages' ? '/ifc-ts-demo/' : '/',
   plugins: [react()],
-  resolve: {
-    alias: {
-      'ifc-ts': path.resolve(__dirname, '../ifc-ts/src')
-    }
-  }
-})
+}))
