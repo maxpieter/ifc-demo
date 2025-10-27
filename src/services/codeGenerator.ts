@@ -25,13 +25,68 @@ interface GeneratorInput {
 }
 
 const RESERVED_IDENTIFIERS = new Set([
-  'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do',
-  'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'import',
-  'in', 'instanceof', 'new', 'null', 'return', 'super', 'switch', 'this', 'throw', 'true', 'try',
-  'typeof', 'var', 'void', 'while', 'with', 'yield', 'let', 'static', 'implements', 'interface',
-  'package', 'private', 'protected', 'public', 'await', 'abstract', 'boolean', 'byte', 'char',
-  'double', 'final', 'float', 'goto', 'int', 'long', 'native', 'short', 'synchronized', 'throws',
-  'transient', 'volatile'
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'debugger',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'enum',
+  'export',
+  'extends',
+  'false',
+  'finally',
+  'for',
+  'function',
+  'if',
+  'import',
+  'in',
+  'instanceof',
+  'new',
+  'null',
+  'return',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'true',
+  'try',
+  'typeof',
+  'var',
+  'void',
+  'while',
+  'with',
+  'yield',
+  'let',
+  'static',
+  'implements',
+  'interface',
+  'package',
+  'private',
+  'protected',
+  'public',
+  'await',
+  'abstract',
+  'boolean',
+  'byte',
+  'char',
+  'double',
+  'final',
+  'float',
+  'goto',
+  'int',
+  'long',
+  'native',
+  'short',
+  'synchronized',
+  'throws',
+  'transient',
+  'volatile',
 ]);
 
 /**
@@ -60,10 +115,10 @@ function generateLatticeTypes(lattice: Lattice): string {
     return '// No labels defined in lattice\n';
   }
 
-  const idToLabel = new Map(labels.map(label => [label.id, label]));
+  const idToLabel = new Map(labels.map((label) => [label.id, label]));
   const sanitizedNames = new Map<string, string>();
   const usedNames = new Set<string>();
-  labels.forEach(label => {
+  labels.forEach((label) => {
     const prettyName = label.name ?? label.id;
     const base = sanitizeLabelName(prettyName);
     let candidate = base;
@@ -78,17 +133,17 @@ function generateLatticeTypes(lattice: Lattice): string {
   // Build adjacency for topological order
   const outgoing = new Map<string, string[]>();
   const incoming = new Map<string, string[]>();
-  labels.forEach(label => {
+  labels.forEach((label) => {
     outgoing.set(label.id, []);
     incoming.set(label.id, []);
   });
-  edges.forEach(edge => {
+  edges.forEach((edge) => {
     outgoing.get(edge.from)?.push(edge.to);
     incoming.get(edge.to)?.push(edge.from);
   });
 
   const indegree = new Map<string, number>();
-  labels.forEach(label => indegree.set(label.id, incoming.get(label.id)?.length ?? 0));
+  labels.forEach((label) => indegree.set(label.id, incoming.get(label.id)?.length ?? 0));
 
   const queue = Array.from(indegree.entries())
     .filter(([, degree]) => degree === 0)
@@ -99,7 +154,7 @@ function generateLatticeTypes(lattice: Lattice): string {
   while (queue.length > 0) {
     const current = queue.shift()!;
     topoOrder.push(current);
-    outgoing.get(current)?.forEach(next => {
+    outgoing.get(current)?.forEach((next) => {
       const nextDegree = (indegree.get(next) ?? 0) - 1;
       indegree.set(next, nextDegree);
       if (nextDegree === 0) {
@@ -110,20 +165,24 @@ function generateLatticeTypes(lattice: Lattice): string {
   }
 
   if (topoOrder.length !== labels.length) {
-    topoOrder.splice(0, topoOrder.length, ...labels.map(l => l.id).sort((a, b) => a.localeCompare(b)));
+    topoOrder.splice(
+      0,
+      topoOrder.length,
+      ...labels.map((l) => l.id).sort((a, b) => a.localeCompare(b))
+    );
   }
 
   const topoIndex = new Map<string, number>();
   topoOrder.forEach((id, idx) => topoIndex.set(id, idx));
 
   const downSets = new Map<string, string[]>();
-  topoOrder.forEach(id => {
+  topoOrder.forEach((id) => {
     const members = new Set<string>([id]);
     const parents = incoming.get(id) ?? [];
-    parents.forEach(parentId => {
+    parents.forEach((parentId) => {
       const parentSet = downSets.get(parentId);
       if (parentSet) {
-        parentSet.forEach(member => members.add(member));
+        parentSet.forEach((member) => members.add(member));
       }
     });
     const orderedMembers = Array.from(members).sort((a, b) => {
@@ -136,12 +195,12 @@ function generateLatticeTypes(lattice: Lattice): string {
 
   let code = '// LATTICE CONSTRUCTION___________________________________\n\n';
 
-  topoOrder.forEach(id => {
+  topoOrder.forEach((id) => {
     const varName = sanitizedNames.get(id)!;
     const parentCandidates = incoming.get(id) ?? [];
     let baseParent: string | undefined;
     let baseParentSize = -1;
-    parentCandidates.forEach(parentId => {
+    parentCandidates.forEach((parentId) => {
       const parentSize = downSets.get(parentId)?.length ?? 0;
       if (parentSize > baseParentSize) {
         baseParent = parentId;
@@ -154,14 +213,14 @@ function generateLatticeTypes(lattice: Lattice): string {
 
     if (baseParent) {
       expression = sanitizedNames.get(baseParent)!;
-      (downSets.get(baseParent) ?? []).forEach(member => covered.add(member));
+      (downSets.get(baseParent) ?? []).forEach((member) => covered.add(member));
     } else {
       expression = `"${id}" as const`;
       covered.add(id);
     }
 
     const members = downSets.get(id) ?? [id];
-    members.forEach(member => {
+    members.forEach((member) => {
       if (covered.has(member)) {
         return;
       }
@@ -246,7 +305,10 @@ function generateSources(sources: Source[]): string {
  * Generates the flow computations (transformations and combinations)
  * Returns both the code and the nodeVarNames mapping
  */
-function generateFlowComputations(graph: FlowGraph, sources: Source[]): { code: string; nodeVarNames: Map<string, string> } {
+function generateFlowComputations(
+  graph: FlowGraph,
+  sources: Source[]
+): { code: string; nodeVarNames: Map<string, string> } {
   let code = '// Flow Computations\n';
   code += '// LIO monad operations: input, bind, ret, label\n\n';
 
@@ -256,7 +318,7 @@ function generateFlowComputations(graph: FlowGraph, sources: Source[]): { code: 
 
   // First, process all sources to create initial computations
   sources.forEach((source, index) => {
-    const sourceNode = graph.nodes.find(n => n.id === source.id);
+    const sourceNode = graph.nodes.find((n) => n.id === source.id);
     if (sourceNode) {
       const varName = `computation${computationCounter++}`;
       const labelId = source.rtLabel.id;
@@ -268,15 +330,15 @@ function generateFlowComputations(graph: FlowGraph, sources: Source[]): { code: 
   });
 
   // Process map and combine nodes
-  const mapAndCombineNodes = graph.nodes.filter(n => n.kind === 'map' || n.kind === 'combine');
+  const mapAndCombineNodes = graph.nodes.filter((n) => n.kind === 'map' || n.kind === 'combine');
 
-  mapAndCombineNodes.forEach(node => {
+  mapAndCombineNodes.forEach((node) => {
     const varName = `computation${computationCounter++}`;
     nodeVarNames.set(node.id, varName);
 
     // Find parent edges
-    const parentEdges = graph.edges.filter(e => e.to === node.id);
-    const parentIds = parentEdges.map(e => e.from);
+    const parentEdges = graph.edges.filter((e) => e.to === node.id);
+    const parentIds = parentEdges.map((e) => e.from);
 
     if (node.kind === 'map') {
       const parentVar = nodeVarNames.get(parentIds[0]);
@@ -349,8 +411,8 @@ function generateSinks(sinks: Sink[], graph: FlowGraph, nodeVarNames: Map<string
   code += '// These operations attempt to write data to sinks\n';
   code += '// Type checking ensures label(data) ⊑ label(sink)\n\n';
 
-  const writeEdges = graph.edges.filter(e => {
-    const targetNode = graph.nodes.find(n => n.id === e.to);
+  const writeEdges = graph.edges.filter((e) => {
+    const targetNode = graph.nodes.find((n) => n.id === e.to);
     return targetNode?.kind === 'sink';
   });
 
@@ -358,11 +420,11 @@ function generateSinks(sinks: Sink[], graph: FlowGraph, nodeVarNames: Map<string
     code += '// No write operations performed\n';
   } else {
     writeEdges.forEach((edge, index) => {
-      const sourceNode = graph.nodes.find(n => n.id === edge.from);
-      const sinkNode = graph.nodes.find(n => n.id === edge.to);
+      const sourceNode = graph.nodes.find((n) => n.id === edge.from);
+      const sinkNode = graph.nodes.find((n) => n.id === edge.to);
 
       if (sourceNode && sinkNode) {
-        const sinkIndex = sinks.findIndex(s => `sink-${s.id}` === sinkNode.id);
+        const sinkIndex = sinks.findIndex((s) => `sink-${s.id}` === sinkNode.id);
         const sourceVarName = nodeVarNames.get(sourceNode.id);
         const violation = edge.violation || false;
 

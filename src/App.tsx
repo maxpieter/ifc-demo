@@ -67,7 +67,6 @@ export default function App() {
   const [resetToken, setResetToken] = useState(0);
   const [mode, setMode] = useState<'light' | 'dark'>(() => getSystemMode());
 
-
   const baseThemeOptions = {
     cssVariables: true,
     typography: {
