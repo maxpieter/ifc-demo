@@ -135,7 +135,6 @@ export default function CodeExporter({ lattice, sources, sinks, graph }: CodeExp
             variant="outlined"
             sx={{
               p: 2,
-              backgroundColor: '#000000ff',
               fontFamily: 'monospace',
               fontSize: '0.875rem',
               overflow: 'auto',
